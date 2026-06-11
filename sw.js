@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vensync-v3';
+const CACHE_NAME = 'vensync-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -28,7 +28,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com')) return;
+  if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com') || event.request.url.includes('firebasedatabase.app')) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
