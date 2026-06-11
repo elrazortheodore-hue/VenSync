@@ -1,8 +1,8 @@
-const CACHE_NAME = 'vensync-v4';
+const CACHE_NAME = 'vensync-v5';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/manifest.json',
+  '/favicon.svg',
+  '/css/style.css',
   'https://unpkg.com/lucide@latest'
 ];
 
@@ -28,8 +28,42 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com') || event.request.url.includes('firebasedatabase.app')) return;
 
+  const url = event.request.url;
+  
+  // NEVER cache API requests, Firebase sockets, or Google Fonts services
+  if (
+    url.includes('/api/') || 
+    url.includes('firebaseio.com') || 
+    url.includes('googleapis.com') || 
+    url.includes('firebasedatabase.app')
+  ) {
+    return;
+  }
+
+  // Network-First strategy for HTML document loads.
+  // This ensures serverless redirects (e.g. Master Switch check on '/' or '/public') are evaluated natively.
+  const isHtml = event.request.headers.get('accept')?.includes('text/html') || 
+                 url.endsWith('/private') || 
+                 url.endsWith('/public') ||
+                 new URL(url).pathname === '/';
+
+  if (isHtml) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Cache-First strategy for static styling assets, favicon, and unpkg scripts
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request).then((fetchResponse) => {
@@ -39,7 +73,7 @@ self.addEventListener('fetch', (event) => {
         });
       });
     }).catch(() => {
-      return new Response('Offline mode not fully cached yet.', { status: 503 });
+      return new Response('Offline static asset not found.', { status: 503 });
     })
   );
 });
