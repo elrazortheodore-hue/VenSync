@@ -1,0 +1,20 @@
+{
+  "name": "VenSync",
+  "short_name": "VenSync",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F0F11",
+  "theme_color": "#5C6BC0",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/5C6BC0/FFFFFF?text=VS",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/5C6BC0/FFFFFF?text=VS",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
