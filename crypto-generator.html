@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VenSync Crypto Generator</title>
+  <style>
+    body { background: #030303; color: white; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; }
+    input { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #3b82f6; background: #111; color: white; outline: none; }
+    button { padding: 10px 20px; background: #3b82f6; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
+    pre { background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; color: #60a5fa; max-width: 600px; word-wrap: break-word; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>Owner Hash Generator</h2>
+  <p style="color: #888">Enter your master password (e.g. migwor123) to generate the JSON for your Private Bin.</p>
+  <input type="text" id="pass" placeholder="Password (e.g. migwor123)">
+  <button onclick="generate()">Generate JSON</button>
+  <pre id="output">Awaiting input...</pre>
+  
+  <script>
+    async function generate() {
+      const pass = document.getElementById('pass').value;
+      if (!pass) return;
+      const salt = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+      const data = new TextEncoder().encode(pass + salt);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hash = Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+      
+      document.getElementById('output').innerText = JSON.stringify({
+        ownerHash: hash,
+        ownerSalt: salt,
+        guestSession: { active: false, hash: "", salt: "", expiresAt: 0 }
+      }, null, 2);
+    }
+  </script>
+</body>
+</html>

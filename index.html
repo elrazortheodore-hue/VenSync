@@ -34,13 +34,11 @@
 
 body { background-color: var(--bg-base); color: var(--text-primary); height: 100dvh; display: flex; justify-content: center; overflow: hidden; -webkit-text-size-adjust: 100%; touch-action: manipulation; overscroll-behavior: none; }
 
-/* V4 Cursors */
 @media (pointer: fine) {
     body { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='2' x2='16' y2='30' stroke='white' stroke-width='1.5'/><line x1='2' y1='16' x2='30' y2='16' stroke='white' stroke-width='1.5'/><circle cx='16' cy='16' r='10' stroke='white' stroke-width='1.5' fill='none'/></svg>") 16 16, auto; }
     button, a, input, textarea, .glass-card, .action-btn, [onclick] { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='2' x2='16' y2='30' stroke='black' stroke-width='1.5'/><line x1='2' y1='16' x2='30' y2='16' stroke='black' stroke-width='1.5'/><circle cx='16' cy='16' r='4' fill='red'/></svg>") 16 16, pointer !important; }
 }
 
-/* V4 Aurora Background */
 .aurora-bg {
     position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
     background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), transparent 50%);
@@ -49,16 +47,13 @@ body { background-color: var(--bg-base); color: var(--text-primary); height: 100
 
 #app-container { width: 100%; max-width: 560px; height: 100dvh; display: flex; flex-direction: column; position: relative; z-index: 10; background: transparent; }
 
-/* V4 Glassmorphism Framework */
 .glass-panel { background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
 .glass-card { background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.8); border-radius: 16px; }
 
-/* Screens */
 .screen-card-wrapper { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; z-index: 40; padding: 24px; background: rgba(3,3,3,0.8); backdrop-filter: blur(10px); }
 #screen-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; transition: opacity 300ms ease; background: var(--bg-base); }
 #screen-main { display: none; flex-direction: column; height: 100%; width: 100%; background: transparent; }
 
-/* App UI */
 .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px; flex-shrink: 0; }
 .status-left { display: flex; align-items: center; gap: 12px; }
 
@@ -77,7 +72,6 @@ body { background-color: var(--bg-base); color: var(--text-primary); height: 100
 .textarea-wrapper { flex: 1; background-color: var(--bg-elevated); border-radius: 16px; border: 1px solid var(--border); padding: 14px 16px; display: flex; transition: all 0.3s ease; }
 .textarea-wrapper:focus-within { border-color: var(--accent-primary); background: rgba(255,255,255,0.08); }
 
-/* V4 Custom Animations */
 @keyframes rot { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(59,130,246,0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(59,130,246,0.8)); } }
@@ -85,70 +79,53 @@ body { background-color: var(--bg-base); color: var(--text-primary); height: 100
 @keyframes barPulse { 0% { opacity: 1; box-shadow: 0 0 10px var(--accent-glow); } 100% { opacity: 0; box-shadow: 0 0 0 var(--accent-glow); } }
 @keyframes collapseOut { to { transform: scale(0.9); opacity: 0; margin-bottom: -60px; } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-@keyframes clickShrink { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
-/* Micro-Interaction Classes */
 .clickable { transition: transform 0.1s ease; }
 .clickable:active { transform: scale(0.95); }
 
-/* Component Styling */
 .logo-wordmark { font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-primary); font-size: 28px; margin-bottom: 8px; animation: glow 3s infinite ease-in-out; }
 .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-primary); animation: glow 1.5s infinite; }
 
 .auth-card { padding: 40px; width: 100%; max-width: 320px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; animation: float 6s ease-in-out infinite; }
-.btn-primary { background-color: var(--text-primary); color: var(--bg-base); border: none; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 13px; tracking: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 20px rgba(255,255,255,0.1); width: 100%; }
-.btn-primary:hover { background-color: #e5e5e5; transform: translateY(-2px); box-shadow: 0 5px 25px rgba(255,255,255,0.2); }
+.btn-primary { background-color: var(--text-primary); color: var(--bg-base); border: none; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .btn-primary:active { transform: scale(0.97); }
-.btn-indigo { background-color: var(--accent-primary); color: #fff; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
-.btn-indigo:hover { background-color: var(--accent-glow); box-shadow: 0 5px 25px rgba(59,130,246,0.4); }
+.btn-indigo { background-color: var(--accent-primary); color: #fff; }
+.btn-indigo:hover { background-color: var(--accent-glow); }
 
-.error-toast { color: var(--danger); font-size: 11px; height: 16px; font-weight: 600; tracking: 0.05em; text-transform: uppercase; }
-.guest-input { background-color: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 18px; padding: 16px; border-radius: 12px; text-align: center; width: 100%; outline: none; transition: all 0.3s ease; }
-.guest-input:focus { border-color: var(--accent-primary); background: rgba(255,255,255,0.08); }
-.guest-input.error { border-color: var(--danger); animation: shake 0.4s; }
+.error-toast { color: var(--danger); font-size: 11px; height: 16px; font-weight: 600; text-transform: uppercase; }
+.pass-input { background-color: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 18px; padding: 16px; border-radius: 12px; text-align: center; width: 100%; outline: none; transition: all 0.3s ease; }
+.pass-input:focus { border-color: var(--accent-primary); background: rgba(255,255,255,0.08); }
+.pass-input.error { border-color: var(--danger); animation: shake 0.4s; }
 
 .wordmark-small { font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-primary); font-size: 14px; text-shadow: 0 0 10px rgba(59,130,246,0.5); }
-.guest-badge { display: none; align-items: center; gap: 6px; background-color: rgba(245, 166, 35, 0.1); color: var(--accent-warm); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(245,166,35,0.3); }
+.guest-badge { display: none; align-items: center; gap: 6px; background-color: rgba(245, 166, 35, 0.1); color: var(--accent-warm); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; border: 1px solid rgba(245,166,35,0.3); }
 .revoke-btn { color: var(--danger); cursor: pointer; display: flex; align-items: center; padding: 2px; }
-.clock { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; }
-.status-right { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; }
+.clock { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.status-right { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; transition: color 0.2s; }
 .status-right:hover { color: var(--text-primary); }
 .connection-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); transition: all 0.3s; }
 .connection-dot.live { background-color: var(--success); box-shadow: 0 0 8px rgba(34,197,94,0.6); }
 
-/* V4 Style Pinned Chips */
-.pinned-chip { display: flex; align-items: center; gap: 8px; background-color: var(--bg-elevated); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; text-decoration: none; color: var(--text-primary); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.pinned-chip:hover { transform: translateY(-2px) scale(1.05); background-color: rgba(255,255,255,0.08); border-color: var(--accent-primary); box-shadow: 0 5px 15px rgba(59,130,246,0.2); }
-.pinned-chip:active { transform: scale(0.95); }
+.pinned-chip { display: flex; align-items: center; gap: 8px; background-color: var(--bg-elevated); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; text-decoration: none; color: var(--text-primary); font-size: 11px; font-weight: 600; transition: all 0.2s; }
+.pinned-chip:hover { transform: translateY(-2px); border-color: var(--accent-primary); }
 .pinned-chip img { width: 16px; height: 16px; border-radius: 4px; }
 
-/* V4 Style Messages (Cards instead of Bubbles) */
-.bubble { background: var(--bg-surface); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; border-left: 3px solid var(--accent-primary); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; position: relative; animation: slideUp 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transform-origin: center bottom; transition: transform 0.2s ease, box-shadow 0.2s ease; user-select: text; }
-.bubble:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(59,130,246,0.1); border-color: rgba(255,255,255,0.1); }
-.bubble::before { content: ''; position: absolute; left: -3px; top: 0; bottom: 0; width: 3px; background-color: var(--accent-glow); opacity: 0; animation: barPulse 1.5s ease-out; border-radius: 3px 0 0 3px; }
+.bubble { background: var(--bg-surface); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; border-left: 3px solid var(--accent-primary); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; position: relative; animation: slideUp 400ms forwards; opacity: 0; user-select: text; }
+.bubble:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
 .bubble-text { font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; font-weight: 300; }
 .bubble-link { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-glow); text-decoration: none; word-break: break-all; font-weight: 400; padding: 8px 12px; background: rgba(59,130,246,0.1); border-radius: 8px; border: 1px solid rgba(59,130,246,0.2); transition: all 0.2s; display: inline-block; }
-.bubble-link:hover { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.4); transform: translateX(4px); }
 .bubble-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid var(--border); padding-top: 12px; user-select: none; }
 .bubble-timestamp { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 .bubble-actions { display: flex; gap: 16px; }
-.action-btn { background: none; border: none; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s ease; cursor: pointer; }
-.action-btn:hover { color: var(--text-primary); transform: scale(1.1); }
-.action-btn:active { transform: scale(0.9); }
-.action-btn.success { color: var(--success); }
+.action-btn { background: none; border: none; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; cursor: pointer; }
+.action-btn:hover { color: var(--text-primary); }
 .action-btn.danger:hover { color: var(--danger); }
 
-textarea { width: 100%; background: none; border: none; color: var(--text-primary); font-size: 15px; line-height: 1.5; font-weight: 300; resize: none; outline: none; max-height: 100px; overflow-y: auto; }
-textarea::placeholder { color: var(--text-dim); }
-textarea::-webkit-scrollbar { display: none; }
+textarea { width: 100%; background: none; border: none; color: var(--text-primary); font-size: 15px; resize: none; outline: none; max-height: 100px; overflow-y: auto; }
+.send-btn { width: 48px; height: 48px; border-radius: 16px; background-color: var(--accent-primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.send-btn:disabled { opacity: 0.3; pointer-events: none; }
 
-.send-btn { width: 48px; height: 48px; border-radius: 16px; background-color: var(--accent-primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
-.send-btn:hover { background-color: var(--accent-glow); transform: translateY(-2px) scale(1.05); box-shadow: 0 5px 20px rgba(59,130,246,0.5); }
-.send-btn:active { transform: scale(0.9); }
-.send-btn:disabled { opacity: 0.3; pointer-events: none; transform: none; box-shadow: none; background-color: var(--text-dim); }
-
-/* Custom V4 Toast */
-#toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); backdrop-filter: blur(20px); border: 1px solid var(--accent-primary); padding: 8px 24px; border-radius: 30px; color: var(--accent-primary); font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 0.1em; opacity: 0; transition: opacity 0.3s ease; z-index: 100; pointer-events: none; box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+#toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); backdrop-filter: blur(20px); border: 1px solid var(--accent-primary); padding: 8px 24px; border-radius: 30px; color: var(--accent-primary); font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; opacity: 0; transition: opacity 0.3s ease; z-index: 100; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -158,36 +135,19 @@ textarea::-webkit-scrollbar { display: none; }
   <div id="app-container">
     <div id="screen-loading">
       <div class="logo-wordmark">VenSync</div>
-      <p class="auth-subtitle" style="color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;">Infinity Terminal</p>
+      <p style="color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;">Infinity Terminal</p>
       <div class="pulse-dot" style="margin-top: 20px;"></div>
+      <div id="boot-error" class="error-toast" style="margin-top:20px;"></div>
     </div>
 
     <div id="screen-auth" class="screen-card-wrapper">
       <div class="glass-card auth-card">
-        <i data-lucide="box" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
+        <i data-lucide="shield-alert" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
         <div class="logo-wordmark" style="font-size: 20px;">VenSync</div>
-        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px;">Owner access only</p>
-        <button id="btn-google-auth" class="btn-primary clickable">
-          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Authenticate
-        </button>
+        <p style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Encrypted Access</p>
+        <input type="password" id="auth-input" class="pass-input" placeholder="Passphrase" autocomplete="off">
+        <button id="btn-auth-submit" class="btn-primary btn-indigo clickable" style="width: 100%;">Access Secure Node</button>
         <div id="auth-error" class="error-toast"></div>
-      </div>
-    </div>
-
-    <div id="screen-guest" class="screen-card-wrapper">
-      <div class="glass-card auth-card">
-        <i data-lucide="unlock" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
-        <div class="logo-wordmark" style="font-size: 20px;">VenSync</div>
-        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Enter guest code</p>
-        <input type="text" id="guest-input" class="guest-input" placeholder="••••••••" autocomplete="off" spellcheck="false" style="-webkit-text-security: disc;">
-        <button id="btn-guest-submit" class="btn-primary btn-indigo clickable" style="width: 100%;">Access</button>
-        <div id="guest-error" class="error-toast"></div>
       </div>
     </div>
 
@@ -202,7 +162,7 @@ textarea::-webkit-scrollbar { display: none; }
         <div class="clock" id="clock">00:00:00</div>
         <div class="status-right clickable" id="btn-generate-guest" title="Generate Guest Code">
           <div id="connection-dot" class="connection-dot"></div>
-          <span id="connection-text">Connecting…</span>
+          <span id="connection-text">Live Sync</span>
         </div>
       </div>
 
@@ -216,8 +176,8 @@ textarea::-webkit-scrollbar { display: none; }
 
       <div class="sync-pad" id="sync-pad">
         <div class="empty-state" id="empty-state">
-          <i data-lucide="database" width="32" height="32" style="opacity: 0.3; animation: float 4s infinite ease-in-out;"></i>
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Awaiting Input Data</span>
+          <i data-lucide="database" width="32" height="32" style="opacity: 0.3;"></i>
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Awaiting Data</span>
         </div>
       </div>
 
@@ -232,43 +192,19 @@ textarea::-webkit-scrollbar { display: none; }
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, get, set, remove, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const CONFIG = {
-      ALLOWED_EMAIL: 'elrazortheodore@gmail.com',
-      FIREBASE: {
-        apiKey: "AIzaSyCXucunQzPCIMgsp0Y2TS9jaUy7Hs7spps",
-        authDomain: "upbox-6ae1c.firebaseapp.com",
-        projectId: "upbox-6ae1c",
-        storageBucket: "upbox-6ae1c.firebasestorage.app",
-        messagingSenderId: "550686984100",
-        appId: "1:550686984100:web:cf45f0bf4768e5591da331",
-        measurementId: "G-VNP7R4LNNR",
-        databaseURL: "https://upbox-6ae1c-default-rtdb.europe-west1.firebasedatabase.app"
-      }
-    };
-
-    const app = initializeApp(CONFIG.FIREBASE);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    setPersistence(auth, browserLocalPersistence);
-
-    const GUEST_PASSPHRASE = 'migwo123';
-    const SESSION_DURATION = 300000;
-    
-    const PINNED_LINKS = [
-      { label: 'GitHub', url: 'https://github.com' },
-      { label: 'Notion', url: 'https://notion.so' },
-      { label: 'Figma', url: 'https://figma.com' },
-      { label: 'LinkedIn', url: 'https://linkedin.com' },
-      { label: 'ChatGPT', url: 'https://chatgpt.com' },
-      { label: 'Claude', url: 'https://claude.ai' }
-    ];
-
+  <script>
     if (window.lucide) window.lucide.createIcons();
+
+    let privateData = null;
+    let publicData = { messages: [] };
+    let isOwner = false;
+    const GUEST_PASSPHRASE = 'migwor123';
+
+    async function computeHash(pass, salt) {
+      const data = new TextEncoder().encode(pass + salt);
+      const buffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
 
     function triggerToast(msg) {
       const toast = document.getElementById('toast');
@@ -277,196 +213,172 @@ textarea::-webkit-scrollbar { display: none; }
       setTimeout(() => toast.style.opacity = '0', 3000);
     }
 
-    function bootstrapAuth() {
-      const screenLoading = document.getElementById('screen-loading');
-      const screenAuth = document.getElementById('screen-auth');
-      const screenGuest = document.getElementById('screen-guest');
-      const authError = document.getElementById('auth-error');
-
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          if (user.email === CONFIG.ALLOWED_EMAIL) {
-            initUI(true);
-          } else {
-            await signOut(auth);
-            authError.textContent = "UNAUTHORIZED ACCESS.";
-            screenAuth.style.display = 'flex';
-            screenLoading.style.opacity = '0';
-            setTimeout(() => { screenLoading.style.display = 'none'; }, 300);
-          }
-        } else {
-          if (sessionStorage.getItem('vs_guest_valid')) {
-            startGuestSession();
-          } else {
-            try {
-              const snapshot = await get(ref(db, 'upbox/guestSession'));
-              if (snapshot.exists() && snapshot.val().active) {
-                screenGuest.style.display = 'flex';
-                setupGuestLogin();
-              } else {
-                screenAuth.style.display = 'flex';
-              }
-            } catch (error) {
-              screenAuth.style.display = 'flex';
-            }
-            screenLoading.style.opacity = '0';
-            setTimeout(() => { screenLoading.style.display = 'none'; }, 300);
-          }
-        }
-      });
-
-      document.getElementById('btn-google-auth').addEventListener('click', () => {
-        signInWithPopup(auth, new GoogleAuthProvider()).catch(err => {
-          authError.textContent = err.message;
-          setTimeout(() => authError.textContent = '', 3000);
-        });
-      });
-    }
-
-    function setupGuestLogin() {
-      const btnGuestSubmit = document.getElementById('btn-guest-submit');
-      const guestInput = document.getElementById('guest-input');
-      
-      btnGuestSubmit.addEventListener('click', validateGuestCode);
-      guestInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') validateGuestCode(); });
-    }
-
-    async function validateGuestCode() {
-      const guestInput = document.getElementById('guest-input');
-      const guestError = document.getElementById('guest-error');
-      const code = guestInput.value.trim();
-      if (!code) return;
-
+    async function fetchPrivate() {
       try {
-        const snapshot = await get(ref(db, 'upbox/guestSession'));
-        const session = snapshot.val();
-        
-        if (!session || !session.active || Date.now() > session.expiresAt) {
-          showError(guestError, guestInput, 'CODE EXPIRED');
-          return;
-        }
-
-        const encoder = new TextEncoder();
-        const data = encoder.encode(code + session.salt);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-        
-        if (hashHex !== session.hash) {
-          showError(guestError, guestInput, 'INVALID PASSPHRASE');
-          return;
-        }
-
-        sessionStorage.setItem('vs_guest_valid', 'true');
-        document.getElementById('screen-guest').style.display = 'none';
-        triggerToast("GUEST AUTHENTICATED");
-        startGuestSession();
-      } catch (e) {
-        showError(guestError, guestInput, 'NETWORK ERROR');
+        const r = await fetch('/api/private');
+        if(!r.ok) throw new Error("Private API Error");
+        return await r.json();
+      } catch(e) {
+        return null;
       }
     }
 
-    function showError(errEl, inputEl, msg) {
-      errEl.textContent = msg;
-      inputEl.classList.add('error');
-      setTimeout(() => {
-        errEl.textContent = '';
-        inputEl.classList.remove('error');
-      }, 3000);
+    async function savePrivate(data) {
+      try {
+        await fetch('/api/private', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+      } catch(e) { console.error("Private Save Error", e); }
     }
 
-    function startGuestSession() {
-      initUI(false); 
-      
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') endGuestSession();
-      });
-      window.addEventListener('blur', endGuestSession);
-      
-      onValue(ref(db, 'upbox/guestSession'), (snapshot) => {
-        if (!snapshot.exists() || !snapshot.val().active || Date.now() > snapshot.val().expiresAt) {
-          endGuestSession();
-        }
-      });
+    async function fetchPublic() {
+      try {
+        const r = await fetch('/api/public');
+        if(!r.ok) throw new Error("Public API Error");
+        return await r.json();
+      } catch(e) {
+        return null;
+      }
     }
 
-    function endGuestSession() {
-      sessionStorage.removeItem('vs_guest_valid');
-      if (auth.currentUser) auth.signOut();
-      window.location.replace('about:blank');
+    async function savePublic(data) {
+      try {
+        await fetch('/api/public', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+      } catch(e) { console.error("Public Save Error", e); }
     }
 
-    async function generateGuestCode() {
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2,'0')).join('');
-      const encoder = new TextEncoder();
-      const data = encoder.encode(GUEST_PASSPHRASE + saltHex);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-
-      await set(ref(db, 'upbox/guestSession'), {
-        hash: hashHex,
-        salt: saltHex,
-        expiresAt: Date.now() + SESSION_DURATION,
-        active: true
-      });
-      
-      navigator.clipboard.writeText(GUEST_PASSPHRASE);
-      triggerToast(`GUEST CODE GENERATED & COPIED: ${GUEST_PASSPHRASE}`);
-    }
-
-    async function revokeGuestSession() {
-      await remove(ref(db, 'upbox/guestSession'));
-      triggerToast("GUEST REVOKED");
-    }
-
-    function initUI(isOwner) {
+    async function boot() {
       const screenLoading = document.getElementById('screen-loading');
-      const screenMain = document.getElementById('screen-main');
-      
-      screenLoading.style.opacity = '0';
-      setTimeout(() => { 
-        screenLoading.style.display = 'none'; 
-        screenMain.style.display = 'flex';
-        if(window.lucide) window.lucide.createIcons();
-      }, 300);
+      const bootErr = document.getElementById('boot-error');
 
+      privateData = await fetchPrivate();
+      if(!privateData) {
+        bootErr.innerText = "FAILED TO CONNECT TO PRIVATE BIN. CHECK VERCEL ENV.";
+        return;
+      }
+
+      if (sessionStorage.getItem('vs_owner')) {
+        isOwner = true;
+        initUI();
+      } else if (sessionStorage.getItem('vs_guest')) {
+        if(privateData.guestSession && privateData.guestSession.active && Date.now() < privateData.guestSession.expiresAt) {
+          isOwner = false;
+          initUI();
+        } else {
+          sessionStorage.removeItem('vs_guest');
+          showAuth();
+        }
+      } else {
+        showAuth();
+      }
+    }
+
+    function showAuth() {
+      document.getElementById('screen-loading').style.display = 'none';
+      document.getElementById('screen-auth').style.display = 'flex';
+
+      const btn = document.getElementById('btn-auth-submit');
+      const input = document.getElementById('auth-input');
+      const err = document.getElementById('auth-error');
+
+      const attemptAuth = async () => {
+        const pass = input.value.trim();
+        if(!pass) return;
+
+        const hashedOwner = await computeHash(pass, privateData.ownerSalt);
+        if (hashedOwner === privateData.ownerHash) {
+          sessionStorage.setItem('vs_owner', 'true');
+          isOwner = true;
+          document.getElementById('screen-auth').style.display = 'none';
+          initUI();
+          triggerToast("OWNER AUTHENTICATED");
+          return;
+        }
+
+        if (privateData.guestSession && privateData.guestSession.active && Date.now() < privateData.guestSession.expiresAt) {
+          const hashedGuest = await computeHash(pass, privateData.guestSession.salt);
+          if (hashedGuest === privateData.guestSession.hash) {
+            sessionStorage.setItem('vs_guest', 'true');
+            isOwner = false;
+            document.getElementById('screen-auth').style.display = 'none';
+            initUI();
+            triggerToast("GUEST AUTHENTICATED");
+            return;
+          }
+        }
+
+        err.innerText = "ACCESS DENIED";
+        input.classList.add('error');
+        setTimeout(() => { err.innerText = ''; input.classList.remove('error'); }, 3000);
+      };
+
+      btn.onclick = attemptAuth;
+      input.onkeypress = (e) => { if(e.key === 'Enter') attemptAuth(); };
+    }
+
+    function initUI() {
+      document.getElementById('screen-loading').style.display = 'none';
+      document.getElementById('screen-main').style.display = 'flex';
+      
       setInterval(() => {
         document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
       }, 1000);
 
-      onValue(ref(db, '.info/connected'), (snap) => {
-        const dot = document.getElementById('connection-dot');
-        const text = document.getElementById('connection-text');
-        if (snap.val() === true) {
-          dot.classList.add('live'); text.textContent = 'Live';
+      const guestBadge = document.getElementById('guest-badge');
+      const btnGen = document.getElementById('btn-generate-guest');
+      
+      if(isOwner) {
+        if(privateData.guestSession && privateData.guestSession.active && Date.now() < privateData.guestSession.expiresAt) {
+          guestBadge.style.display = 'flex';
+          btnGen.style.display = 'none';
         } else {
-          dot.classList.remove('live'); text.textContent = 'Offline';
+          guestBadge.style.display = 'none';
+          btnGen.style.display = 'flex';
         }
-      });
 
-      if (isOwner) {
-        document.getElementById('btn-generate-guest').addEventListener('click', generateGuestCode);
-        document.getElementById('btn-revoke-guest').addEventListener('click', (e) => { e.stopPropagation(); revokeGuestSession(); });
+        btnGen.onclick = async () => {
+          const salt = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+          const hash = await computeHash(GUEST_PASSPHRASE, salt);
+          privateData.guestSession = { active: true, hash, salt, expiresAt: Date.now() + 300000 };
+          await savePrivate(privateData);
+          guestBadge.style.display = 'flex';
+          btnGen.style.display = 'none';
+          navigator.clipboard.writeText(GUEST_PASSPHRASE);
+          triggerToast(`CODE GENERATED & COPIED: ${GUEST_PASSPHRASE}`);
+        };
 
-        onValue(ref(db, 'upbox/guestSession'), (snapshot) => {
-          if (snapshot.exists() && snapshot.val().active && Date.now() < snapshot.val().expiresAt) {
-            document.getElementById('guest-badge').style.display = 'flex';
-            document.getElementById('btn-generate-guest').style.display = 'none';
-          } else {
-            document.getElementById('guest-badge').style.display = 'none';
-            document.getElementById('btn-generate-guest').style.display = 'flex';
-            if(snapshot.exists()) {
-               remove(ref(db, 'upbox/guestSession'));
-            }
-          }
-        });
+        document.getElementById('btn-revoke-guest').onclick = async (e) => {
+          e.stopPropagation();
+          privateData.guestSession = { active: false, hash: "", salt: "", expiresAt: 0 };
+          await savePrivate(privateData);
+          guestBadge.style.display = 'none';
+          btnGen.style.display = 'flex';
+          triggerToast("GUEST REVOKED");
+        };
 
       } else {
-        document.getElementById('btn-generate-guest').style.display = 'none';
-        document.getElementById('guest-badge').style.display = 'flex';
+        btnGen.style.display = 'none';
+        guestBadge.style.display = 'flex';
         document.getElementById('btn-revoke-guest').style.display = 'none';
       }
 
+      setupPinnedLinks();
+      setupMessages();
+    }
+
+    function setupPinnedLinks() {
+      const PINNED_LINKS = [
+        { label: 'GitHub', url: 'https://github.com' },
+        { label: 'Notion', url: 'https://notion.so' },
+        { label: 'Figma', url: 'https://figma.com' },
+        { label: 'LinkedIn', url: 'https://linkedin.com' }
+      ];
       const pinnedPanel = document.getElementById('pinned-panel');
       const pinnedIcon = document.getElementById('pinned-icon');
       document.getElementById('pinned-toggle').addEventListener('click', () => {
@@ -483,15 +395,13 @@ textarea::-webkit-scrollbar { display: none; }
         a.innerHTML = `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="${link.label}"> ${link.label}`;
         pinnedGrid.appendChild(a);
       });
-
-      setupMessages();
     }
 
+    let msgInterval;
     function setupMessages() {
       const msgInput = document.getElementById('msg-input');
       const btnSend = document.getElementById('btn-send');
       const syncPad = document.getElementById('sync-pad');
-      const emptyState = document.getElementById('empty-state');
 
       msgInput.addEventListener('input', () => {
         msgInput.style.height = 'auto';
@@ -500,9 +410,7 @@ textarea::-webkit-scrollbar { display: none; }
       });
 
       msgInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-          e.preventDefault(); sendMessage();
-        }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendMessage(); }
       });
 
       btnSend.addEventListener('click', () => {
@@ -515,89 +423,114 @@ textarea::-webkit-scrollbar { display: none; }
         const text = msgInput.value.trim();
         if(!text) return;
         const isUrl = /^https?:\/\/.+/i.test(text);
-        await push(ref(db, 'upbox/messages'), { text, type: isUrl ? 'link' : 'text', timestamp: Date.now() });
+        
+        const newMsg = {
+          id: 'msg-' + Date.now() + Math.random().toString(36).substr(2, 5),
+          text,
+          type: isUrl ? 'link' : 'text',
+          timestamp: Date.now()
+        };
+
+        publicData.messages.push(newMsg);
+        renderMessages();
+        
         msgInput.value = ''; msgInput.style.height = 'auto'; btnSend.disabled = true; msgInput.focus();
+        
+        document.getElementById('connection-dot').classList.remove('live');
+        await savePublic(publicData);
+        document.getElementById('connection-dot').classList.add('live');
       }
 
-      onValue(ref(db, 'upbox/messages'), (snapshot) => {
-        const existingNodes = new Set(Array.from(syncPad.querySelectorAll('.bubble')).map(n => n.id.replace('msg-', '')));
-        const currentNodes = new Set();
-        
-        if (snapshot.exists()) {
-          emptyState.style.display = 'none';
-          snapshot.forEach(child => {
-            currentNodes.add(child.key);
-            if (!existingNodes.has(child.key)) {
-              renderBubble(child.key, child.val(), syncPad);
-            }
-          });
-          
-          existingNodes.forEach(id => {
-            if(!currentNodes.has(id)) {
-              const el = document.getElementById(`msg-${id}`);
-              if(el) {
-                el.style.animation = 'collapseOut 200ms ease forwards';
-                setTimeout(() => el.remove(), 200);
-              }
-            }
-          });
-          
-          // Only scroll down if we are already near the bottom, to prevent forced scrolling during reading.
-          if(syncPad.scrollHeight - syncPad.scrollTop - syncPad.clientHeight < 150) {
-              syncPad.scrollTo({ top: syncPad.scrollHeight, behavior: 'smooth' });
+      const syncLoop = async () => {
+        const data = await fetchPublic();
+        if(data && data.messages) {
+          document.getElementById('connection-dot').classList.add('live');
+          if(JSON.stringify(data.messages) !== JSON.stringify(publicData.messages)) {
+            publicData = data;
+            renderMessages();
           }
         } else {
-          syncPad.querySelectorAll('.bubble').forEach(b => b.remove());
-          emptyState.style.display = 'flex';
+          document.getElementById('connection-dot').classList.remove('live');
         }
-        if(window.lucide) window.lucide.createIcons();
-      });
+      };
+
+      syncLoop();
+      msgInterval = setInterval(syncLoop, 3000);
     }
 
-    function renderBubble(id, data, syncPad) {
-      const div = document.createElement('div');
-      div.className = 'bubble';
-      div.id = `msg-${id}`;
+    function renderMessages() {
+      const syncPad = document.getElementById('sync-pad');
+      const emptyState = document.getElementById('empty-state');
       
-      let contentHtml = '';
-      if (data.type === 'link') {
-        let safeUrl = data.text;
-        if (!/^https?:\/\//i.test(safeUrl)) safeUrl = 'https://' + safeUrl;
-        contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link" title="${escapeHtml(data.text)}"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:text-bottom; margin-right:6px; color: var(--accent-primary);"></i>${escapeHtml(data.text.length > 52 ? data.text.substring(0,52)+'…' : data.text)}</a>`;
-      } else {
-        contentHtml = `<div class="bubble-text">${escapeHtml(data.text)}</div>`;
-      }
+      const existingNodes = new Set(Array.from(syncPad.querySelectorAll('.bubble')).map(n => n.id));
+      const currentNodes = new Set();
+      
+      if(publicData.messages.length > 0) {
+        emptyState.style.display = 'none';
+        publicData.messages.forEach(msg => {
+          currentNodes.add(msg.id);
+          if(!existingNodes.has(msg.id)) {
+            const div = document.createElement('div');
+            div.className = 'bubble';
+            div.id = msg.id;
+            
+            let contentHtml = '';
+            if (msg.type === 'link') {
+              let safeUrl = msg.text;
+              if (!/^https?:\/\//i.test(safeUrl)) safeUrl = 'https://' + safeUrl;
+              contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:text-bottom; margin-right:6px; color: var(--accent-primary);"></i>${escapeHtml(msg.text.length > 52 ? msg.text.substring(0,52)+'…' : msg.text)}</a>`;
+            } else {
+              contentHtml = `<div class="bubble-text">${escapeHtml(msg.text)}</div>`;
+            }
 
-      const timeStr = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      div.innerHTML = `
-        ${contentHtml}
-        <div class="bubble-footer">
-          <div class="bubble-timestamp">${timeStr}</div>
-          <div class="bubble-actions">
-            <button class="action-btn" id="copy-${id}"><i data-lucide="copy" width="12" height="12"></i> Copy</button>
-            ${data.type === 'link' ? `<a href="${escapeHtml(safeUrl)}" target="_blank" class="action-btn" style="text-decoration:none;"><i data-lucide="external-link" width="12" height="12"></i> Open</a>` : ''}
-            <button class="action-btn danger" id="del-${id}"><i data-lucide="trash-2" width="12" height="12"></i> Del</button>
-          </div>
-        </div>
-      `;
-      syncPad.appendChild(div);
+            div.innerHTML = `
+              ${contentHtml}
+              <div class="bubble-footer">
+                <div class="bubble-timestamp">${timeStr}</div>
+                <div class="bubble-actions">
+                  <button class="action-btn" id="copy-${msg.id}"><i data-lucide="copy" width="12" height="12"></i> Copy</button>
+                  ${msg.type === 'link' ? `<a href="${escapeHtml(safeUrl)}" target="_blank" class="action-btn" style="text-decoration:none;"><i data-lucide="external-link" width="12" height="12"></i> Open</a>` : ''}
+                  <button class="action-btn danger" id="del-${msg.id}"><i data-lucide="trash-2" width="12" height="12"></i> Del</button>
+                </div>
+              </div>
+            `;
+            syncPad.appendChild(div);
 
-      document.getElementById(`copy-${id}`).addEventListener('click', function() {
-        navigator.clipboard.writeText(data.text).then(() => {
-          triggerToast("ASSET COPIED TO CLIPBOARD");
-          const originalHtml = this.innerHTML;
-          this.innerHTML = `<i data-lucide="check" width="12" height="12"></i> Copied`;
-          this.classList.add('success');
-          if(window.lucide) window.lucide.createIcons();
-          setTimeout(() => { this.innerHTML = originalHtml; this.classList.remove('success'); if(window.lucide) window.lucide.createIcons(); }, 1500);
+            document.getElementById(`copy-${msg.id}`).onclick = function() {
+              navigator.clipboard.writeText(msg.text);
+              triggerToast("COPIED TO CLIPBOARD");
+            };
+
+            document.getElementById(`del-${msg.id}`).onclick = async () => {
+              document.getElementById(msg.id).style.animation = 'collapseOut 200ms forwards';
+              setTimeout(() => document.getElementById(msg.id).remove(), 200);
+              publicData.messages = publicData.messages.filter(m => m.id !== msg.id);
+              await savePublic(publicData);
+              if(publicData.messages.length===0) emptyState.style.display = 'flex';
+            };
+          }
         });
-      });
 
-      document.getElementById(`del-${id}`).addEventListener('click', () => {
-        remove(ref(db, `upbox/messages/${id}`));
-        triggerToast("ASSET DELETED");
-      });
+        existingNodes.forEach(id => {
+          if(!currentNodes.has(id)) {
+            const el = document.getElementById(id);
+            if(el) {
+              el.style.animation = 'collapseOut 200ms forwards';
+              setTimeout(() => el.remove(), 200);
+            }
+          }
+        });
+        
+        if(syncPad.scrollHeight - syncPad.scrollTop - syncPad.clientHeight < 150) {
+            syncPad.scrollTo({ top: syncPad.scrollHeight, behavior: 'smooth' });
+        }
+      } else {
+        syncPad.querySelectorAll('.bubble').forEach(b => b.remove());
+        emptyState.style.display = 'flex';
+      }
+      if(window.lucide) window.lucide.createIcons();
     }
 
     function escapeHtml(unsafe) {
@@ -608,7 +541,7 @@ textarea::-webkit-scrollbar { display: none; }
       window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
     }
 
-    bootstrapAuth();
+    boot();
   </script>
 </body>
 </html>
