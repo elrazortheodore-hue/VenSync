@@ -3,176 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>VenSync</title>
+  <title>VenSync | Infinity</title>
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#0F0F11">
+  <meta name="theme-color" content="#030303">
   <meta name="apple-mobile-web-app-capable" content="yes">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
 :root {
-  --bg-base: #0F0F11;
-  --bg-surface: #1A1A1F;
-  --bg-elevated: #242429;
-  --accent-primary: #5C6BC0;
-  --accent-glow: #7986CB;
+  --bg-base: #030303;
+  --bg-surface: rgba(10, 10, 10, 0.6);
+  --bg-elevated: rgba(255, 255, 255, 0.03);
+  --accent-primary: #3b82f6;
+  --accent-glow: #60a5fa;
   --accent-warm: #F5A623;
-  --text-primary: #F0F0F5;
+  --text-primary: #ffffff;
   --text-secondary: #8A8A9A;
   --text-dim: #4A4A5A;
-  --border: #2A2A32;
-  --success: #4CAF82;
-  --danger: #E05555;
+  --border: rgba(255, 255, 255, 0.05);
+  --success: #22c55e;
+  --danger: #ef4444;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
-body { background-color: var(--bg-base); color: var(--text-primary); height: 100dvh; display: flex; justify-content: center; overflow: hidden; }
-#app-container { width: 100%; max-width: 560px; height: 100dvh; display: flex; flex-direction: column; position: relative; background-color: var(--bg-base); }
-.screen-card-wrapper { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-base); z-index: 40; padding: 24px; }
-#screen-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--bg-base); z-index: 50; transition: opacity 300ms ease; }
-#screen-main { display: none; flex-direction: column; height: 100%; width: 100%; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; user-select: none; }
 
-.status-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); background-color: var(--bg-surface); flex-shrink: 0; }
+body { background-color: var(--bg-base); color: var(--text-primary); height: 100dvh; display: flex; justify-content: center; overflow: hidden; -webkit-text-size-adjust: 100%; touch-action: manipulation; overscroll-behavior: none; }
+
+/* V4 Cursors */
+@media (pointer: fine) {
+    body { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='2' x2='16' y2='30' stroke='white' stroke-width='1.5'/><line x1='2' y1='16' x2='30' y2='16' stroke='white' stroke-width='1.5'/><circle cx='16' cy='16' r='10' stroke='white' stroke-width='1.5' fill='none'/></svg>") 16 16, auto; }
+    button, a, input, textarea, .glass-card, .action-btn, [onclick] { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><line x1='16' y1='2' x2='16' y2='30' stroke='black' stroke-width='1.5'/><line x1='2' y1='16' x2='30' y2='16' stroke='black' stroke-width='1.5'/><circle cx='16' cy='16' r='4' fill='red'/></svg>") 16 16, pointer !important; }
+}
+
+/* V4 Aurora Background */
+.aurora-bg {
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.1), transparent 50%);
+    animation: rot 20s linear infinite; pointer-events: none; z-index: 0;
+}
+
+#app-container { width: 100%; max-width: 560px; height: 100dvh; display: flex; flex-direction: column; position: relative; z-index: 10; background: transparent; }
+
+/* V4 Glassmorphism Framework */
+.glass-panel { background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.glass-card { background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.8); border-radius: 16px; }
+
+/* Screens */
+.screen-card-wrapper { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; z-index: 40; padding: 24px; background: rgba(3,3,3,0.8); backdrop-filter: blur(10px); }
+#screen-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; transition: opacity 300ms ease; background: var(--bg-base); }
+#screen-main { display: none; flex-direction: column; height: 100%; width: 100%; background: transparent; }
+
+/* App UI */
+.status-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px; flex-shrink: 0; }
 .status-left { display: flex; align-items: center; gap: 12px; }
 
-.pinned-panel { background-color: var(--bg-surface); border-bottom: 1px solid var(--border); overflow: hidden; max-height: 0; transition: max-height 300ms ease; flex-shrink: 0; }
-.pinned-panel.expanded { max-height: 200px; }
-.pinned-header { padding: 8px 16px; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-elevated); }
+.pinned-panel { overflow: hidden; max-height: 0; transition: max-height 400ms cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.pinned-panel.expanded { max-height: 250px; }
+.pinned-header { padding: 12px 16px; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
 .pinned-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
 
-.sync-pad { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.sync-pad { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
 .sync-pad::-webkit-scrollbar { width: 4px; }
-.sync-pad::-webkit-scrollbar-track { background: var(--bg-elevated); }
-.sync-pad::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 2px; }
+.sync-pad::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
 .empty-state { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text-dim); }
 
-.input-bar { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); background-color: var(--bg-surface); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-end; position: sticky; bottom: 0; }
-.textarea-wrapper { flex: 1; background-color: var(--bg-elevated); border-radius: 12px; border: 1px solid var(--border); padding: 12px 16px; display: flex; }
-.textarea-wrapper:focus-within { border-color: var(--accent-primary); }
+.input-bar { padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-end; position: sticky; bottom: 0; }
+.textarea-wrapper { flex: 1; background-color: var(--bg-elevated); border-radius: 16px; border: 1px solid var(--border); padding: 14px 16px; display: flex; transition: all 0.3s ease; }
+.textarea-wrapper:focus-within { border-color: var(--accent-primary); background: rgba(255,255,255,0.08); }
 
-@keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(92, 107, 192, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(92, 107, 192, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(92, 107, 192, 0); } }
-@keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-@keyframes barPulse { 0% { opacity: 1; box-shadow: 0 0 8px var(--accent-glow); } 100% { opacity: 0; box-shadow: 0 0 0 var(--accent-glow); } }
-@keyframes collapseOut { to { transform: scaleY(0); opacity: 0; margin-bottom: -40px; } }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+/* V4 Custom Animations */
+@keyframes rot { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes glow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(59,130,246,0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(59,130,246,0.8)); } }
+@keyframes slideUp { 0% { opacity: 0; transform: translateY(20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes barPulse { 0% { opacity: 1; box-shadow: 0 0 10px var(--accent-glow); } 100% { opacity: 0; box-shadow: 0 0 0 var(--accent-glow); } }
+@keyframes collapseOut { to { transform: scale(0.9); opacity: 0; margin-bottom: -60px; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@keyframes clickShrink { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
-.logo-wordmark { font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-primary); font-size: 24px; margin-bottom: 16px; }
-.pulse-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-primary); animation: pulse 1.5s infinite; }
-.auth-card { background-color: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.btn-primary { background-color: var(--text-primary); color: var(--bg-base); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 8px; }
-.btn-primary:hover { opacity: 0.9; }
-.btn-indigo { background-color: var(--accent-primary); color: #fff; }
-.btn-indigo:hover { background-color: var(--accent-glow); }
-.error-toast { color: var(--danger); font-size: 13px; height: 20px; }
-.guest-input { background-color: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 18px; padding: 12px; border-radius: 8px; text-align: center; width: 100%; outline: none; transition: border-color 150ms ease; }
-.guest-input:focus { border-color: var(--accent-primary); }
-.guest-input.error { border-color: var(--danger); animation: shake 0.3s; }
+/* Micro-Interaction Classes */
+.clickable { transition: transform 0.1s ease; }
+.clickable:active { transform: scale(0.95); }
 
-.wordmark-small { font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-primary); font-size: 14px; }
-.guest-badge { display: none; align-items: center; gap: 6px; background-color: rgba(245, 166, 35, 0.1); color: var(--accent-warm); font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 12px; }
+/* Component Styling */
+.logo-wordmark { font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-primary); font-size: 28px; margin-bottom: 8px; animation: glow 3s infinite ease-in-out; }
+.pulse-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-primary); animation: glow 1.5s infinite; }
+
+.auth-card { padding: 40px; width: 100%; max-width: 320px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; animation: float 6s ease-in-out infinite; }
+.btn-primary { background-color: var(--text-primary); color: var(--bg-base); border: none; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 13px; tracking: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 20px rgba(255,255,255,0.1); width: 100%; }
+.btn-primary:hover { background-color: #e5e5e5; transform: translateY(-2px); box-shadow: 0 5px 25px rgba(255,255,255,0.2); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-indigo { background-color: var(--accent-primary); color: #fff; box-shadow: 0 0 20px rgba(59,130,246,0.2); }
+.btn-indigo:hover { background-color: var(--accent-glow); box-shadow: 0 5px 25px rgba(59,130,246,0.4); }
+
+.error-toast { color: var(--danger); font-size: 11px; height: 16px; font-weight: 600; tracking: 0.05em; text-transform: uppercase; }
+.guest-input { background-color: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 18px; padding: 16px; border-radius: 12px; text-align: center; width: 100%; outline: none; transition: all 0.3s ease; }
+.guest-input:focus { border-color: var(--accent-primary); background: rgba(255,255,255,0.08); }
+.guest-input.error { border-color: var(--danger); animation: shake 0.4s; }
+
+.wordmark-small { font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-primary); font-size: 14px; text-shadow: 0 0 10px rgba(59,130,246,0.5); }
+.guest-badge { display: none; align-items: center; gap: 6px; background-color: rgba(245, 166, 35, 0.1); color: var(--accent-warm); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(245,166,35,0.3); }
 .revoke-btn { color: var(--danger); cursor: pointer; display: flex; align-items: center; padding: 2px; }
-.clock { color: var(--accent-warm); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-.status-right { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); cursor: pointer; }
-.connection-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); }
-.connection-dot.live { background-color: var(--success); }
+.clock { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; }
+.status-right { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; }
+.status-right:hover { color: var(--text-primary); }
+.connection-dot { width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-dim); transition: all 0.3s; }
+.connection-dot.live { background-color: var(--success); box-shadow: 0 0 8px rgba(34,197,94,0.6); }
 
-.pinned-chip { display: flex; align-items: center; gap: 6px; background-color: var(--bg-elevated); padding: 6px 12px; border-radius: 16px; text-decoration: none; color: var(--text-primary); font-size: 12px; transition: all 150ms ease; }
-.pinned-chip:hover { background-color: var(--border); }
-.pinned-chip img { width: 14px; height: 14px; }
+/* V4 Style Pinned Chips */
+.pinned-chip { display: flex; align-items: center; gap: 8px; background-color: var(--bg-elevated); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; text-decoration: none; color: var(--text-primary); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pinned-chip:hover { transform: translateY(-2px) scale(1.05); background-color: rgba(255,255,255,0.08); border-color: var(--accent-primary); box-shadow: 0 5px 15px rgba(59,130,246,0.2); }
+.pinned-chip:active { transform: scale(0.95); }
+.pinned-chip img { width: 16px; height: 16px; border-radius: 4px; }
 
-.bubble { background-color: var(--bg-surface); border-radius: 10px; border-left: 2px solid var(--accent-primary); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; position: relative; animation: slideUp 320ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transform: translateY(16px); transform-origin: top; }
-.bubble::before { content: ''; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px; background-color: var(--accent-glow); opacity: 0; animation: barPulse 1s ease-out; border-radius: 2px 0 0 2px; }
-.bubble-text { font-size: 15px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
-.bubble-link { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-glow); text-decoration: none; word-break: break-all; }
-.bubble-link:hover { text-decoration: underline; }
-.bubble-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-.bubble-timestamp { font-size: 11px; color: var(--text-dim); }
-.bubble-actions { display: flex; gap: 12px; }
-.action-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 11px; transition: all 150ms ease; }
-.action-btn:hover { color: var(--text-primary); }
+/* V4 Style Messages (Cards instead of Bubbles) */
+.bubble { background: var(--bg-surface); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; border-left: 3px solid var(--accent-primary); padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; position: relative; animation: slideUp 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transform-origin: center bottom; transition: transform 0.2s ease, box-shadow 0.2s ease; user-select: text; }
+.bubble:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(59,130,246,0.1); border-color: rgba(255,255,255,0.1); }
+.bubble::before { content: ''; position: absolute; left: -3px; top: 0; bottom: 0; width: 3px; background-color: var(--accent-glow); opacity: 0; animation: barPulse 1.5s ease-out; border-radius: 3px 0 0 3px; }
+.bubble-text { font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; font-weight: 300; }
+.bubble-link { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-glow); text-decoration: none; word-break: break-all; font-weight: 400; padding: 8px 12px; background: rgba(59,130,246,0.1); border-radius: 8px; border: 1px solid rgba(59,130,246,0.2); transition: all 0.2s; display: inline-block; }
+.bubble-link:hover { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.4); transform: translateX(4px); }
+.bubble-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; border-top: 1px solid var(--border); padding-top: 12px; user-select: none; }
+.bubble-timestamp { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+.bubble-actions { display: flex; gap: 16px; }
+.action-btn { background: none; border: none; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s ease; cursor: pointer; }
+.action-btn:hover { color: var(--text-primary); transform: scale(1.1); }
+.action-btn:active { transform: scale(0.9); }
 .action-btn.success { color: var(--success); }
 .action-btn.danger:hover { color: var(--danger); }
 
-textarea { width: 100%; background: none; border: none; color: var(--text-primary); font-size: 15px; line-height: 1.4; resize: none; outline: none; max-height: 84px; overflow-y: auto; }
+textarea { width: 100%; background: none; border: none; color: var(--text-primary); font-size: 15px; line-height: 1.5; font-weight: 300; resize: none; outline: none; max-height: 100px; overflow-y: auto; }
 textarea::placeholder { color: var(--text-dim); }
 textarea::-webkit-scrollbar { display: none; }
 
-.send-btn { width: 44px; height: 44px; border-radius: 50%; background-color: var(--accent-primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 150ms ease; flex-shrink: 0; }
-.send-btn:hover { background-color: var(--accent-glow); }
-.send-btn:disabled { opacity: 0.4; pointer-events: none; }
+.send-btn { width: 48px; height: 48px; border-radius: 16px; background-color: var(--accent-primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+.send-btn:hover { background-color: var(--accent-glow); transform: translateY(-2px) scale(1.05); box-shadow: 0 5px 20px rgba(59,130,246,0.5); }
+.send-btn:active { transform: scale(0.9); }
+.send-btn:disabled { opacity: 0.3; pointer-events: none; transform: none; box-shadow: none; background-color: var(--text-dim); }
+
+/* Custom V4 Toast */
+#toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); backdrop-filter: blur(20px); border: 1px solid var(--accent-primary); padding: 8px 24px; border-radius: 30px; color: var(--accent-primary); font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; letter-spacing: 0.1em; opacity: 0; transition: opacity 0.3s ease; z-index: 100; pointer-events: none; box-shadow: 0 0 20px rgba(59,130,246,0.3); }
   </style>
 </head>
 <body>
+  <div class="aurora-bg"></div>
+  <div id="toast">SECURE</div>
+
   <div id="app-container">
     <div id="screen-loading">
       <div class="logo-wordmark">VenSync</div>
-      <div class="pulse-dot"></div>
+      <p class="auth-subtitle" style="color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;">Infinity Terminal</p>
+      <div class="pulse-dot" style="margin-top: 20px;"></div>
     </div>
 
     <div id="screen-auth" class="screen-card-wrapper">
-      <div class="auth-card">
-        <div class="logo-wordmark">VenSync</div>
-        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 14px;">Owner access only</p>
-        <button id="btn-google-auth" class="btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <div class="glass-card auth-card">
+        <i data-lucide="box" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
+        <div class="logo-wordmark" style="font-size: 20px;">VenSync</div>
+        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px;">Owner access only</p>
+        <button id="btn-google-auth" class="btn-primary clickable">
+          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Continue with Google
+          Authenticate
         </button>
         <div id="auth-error" class="error-toast"></div>
       </div>
     </div>
 
     <div id="screen-guest" class="screen-card-wrapper">
-      <div class="auth-card">
-        <div class="logo-wordmark">VenSync</div>
-        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 14px;">Enter guest code</p>
-        <input type="text" id="guest-input" class="guest-input" placeholder="••••••••" autocomplete="off" spellcheck="false">
-        <button id="btn-guest-submit" class="btn-primary btn-indigo" style="width: 100%; justify-content: center;">Access</button>
+      <div class="glass-card auth-card">
+        <i data-lucide="unlock" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
+        <div class="logo-wordmark" style="font-size: 20px;">VenSync</div>
+        <p class="auth-subtitle" style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Enter guest code</p>
+        <input type="text" id="guest-input" class="guest-input" placeholder="••••••••" autocomplete="off" spellcheck="false" style="-webkit-text-security: disc;">
+        <button id="btn-guest-submit" class="btn-primary btn-indigo clickable" style="width: 100%;">Access</button>
         <div id="guest-error" class="error-toast"></div>
       </div>
     </div>
 
     <div id="screen-main">
-      <div class="status-bar">
+      <div class="status-bar glass-panel">
         <div class="status-left">
-          <div class="wordmark-small">VenSync</div>
+          <div class="wordmark-small"><i data-lucide="box" width="14" height="14" style="display:inline; vertical-align:text-bottom; margin-right:4px;"></i>VenSync</div>
           <div id="guest-badge" class="guest-badge">
             Guest Active <div id="btn-revoke-guest" class="revoke-btn" title="Revoke"><i data-lucide="x" width="12" height="12"></i></div>
           </div>
         </div>
         <div class="clock" id="clock">00:00:00</div>
-        <div class="status-right" id="btn-generate-guest" title="Generate Guest Code">
+        <div class="status-right clickable" id="btn-generate-guest" title="Generate Guest Code">
           <div id="connection-dot" class="connection-dot"></div>
           <span id="connection-text">Connecting…</span>
         </div>
       </div>
 
-      <div class="pinned-header" id="pinned-toggle">
-        <span>Pinned Links</span>
-        <i data-lucide="chevron-down" id="pinned-icon" width="14" height="14"></i>
+      <div class="pinned-header glass-panel" id="pinned-toggle">
+        <span>Pinned Assets</span>
+        <i data-lucide="chevron-down" id="pinned-icon" width="14" height="14" style="transition: transform 0.3s ease;"></i>
       </div>
-      <div class="pinned-panel" id="pinned-panel">
+      <div class="pinned-panel glass-panel" id="pinned-panel">
         <div class="pinned-grid" id="pinned-grid"></div>
       </div>
 
       <div class="sync-pad" id="sync-pad">
         <div class="empty-state" id="empty-state">
-          <i data-lucide="inbox" width="32" height="32" style="opacity: 0.5;"></i>
-          <span>Nothing here yet. Paste something.</span>
+          <i data-lucide="database" width="32" height="32" style="opacity: 0.3; animation: float 4s infinite ease-in-out;"></i>
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Awaiting Input Data</span>
         </div>
       </div>
 
-      <div class="input-bar">
+      <div class="input-bar glass-panel">
         <div class="textarea-wrapper">
-          <textarea id="msg-input" placeholder="Paste a link or type anything..." rows="1"></textarea>
+          <textarea id="msg-input" placeholder="Paste asset link or text data..." rows="1"></textarea>
         </div>
         <button id="btn-send" class="send-btn" disabled>
           <i data-lucide="arrow-up" width="20" height="20"></i>
@@ -219,6 +269,13 @@ textarea::-webkit-scrollbar { display: none; }
 
     if (window.lucide) window.lucide.createIcons();
 
+    function triggerToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
     function bootstrapAuth() {
       const screenLoading = document.getElementById('screen-loading');
       const screenAuth = document.getElementById('screen-auth');
@@ -231,7 +288,7 @@ textarea::-webkit-scrollbar { display: none; }
             initUI(true);
           } else {
             await signOut(auth);
-            authError.textContent = "This account is not authorized.";
+            authError.textContent = "UNAUTHORIZED ACCESS.";
             screenAuth.style.display = 'flex';
             screenLoading.style.opacity = '0';
             setTimeout(() => { screenLoading.style.display = 'none'; }, 300);
@@ -284,7 +341,7 @@ textarea::-webkit-scrollbar { display: none; }
         const session = snapshot.val();
         
         if (!session || !session.active || Date.now() > session.expiresAt) {
-          showError(guestError, guestInput, 'Code expired or invalid.');
+          showError(guestError, guestInput, 'CODE EXPIRED');
           return;
         }
 
@@ -294,15 +351,16 @@ textarea::-webkit-scrollbar { display: none; }
         const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
         
         if (hashHex !== session.hash) {
-          showError(guestError, guestInput, 'Invalid code.');
+          showError(guestError, guestInput, 'INVALID PASSPHRASE');
           return;
         }
 
         sessionStorage.setItem('vs_guest_valid', 'true');
         document.getElementById('screen-guest').style.display = 'none';
+        triggerToast("GUEST AUTHENTICATED");
         startGuestSession();
       } catch (e) {
-        showError(guestError, guestInput, 'Network or Database error.');
+        showError(guestError, guestInput, 'NETWORK ERROR');
       }
     }
 
@@ -333,7 +391,7 @@ textarea::-webkit-scrollbar { display: none; }
     function endGuestSession() {
       sessionStorage.removeItem('vs_guest_valid');
       if (auth.currentUser) auth.signOut();
-      window.location.replace('https://www.google.com');
+      window.location.replace('about:blank');
     }
 
     async function generateGuestCode() {
@@ -350,11 +408,14 @@ textarea::-webkit-scrollbar { display: none; }
         expiresAt: Date.now() + SESSION_DURATION,
         active: true
       });
-      alert(`Guest code generated. It is: ${GUEST_PASSPHRASE}\nTell the other device to type this.`);
+      
+      navigator.clipboard.writeText(GUEST_PASSPHRASE);
+      triggerToast(`GUEST CODE GENERATED & COPIED: ${GUEST_PASSPHRASE}`);
     }
 
     async function revokeGuestSession() {
       await remove(ref(db, 'upbox/guestSession'));
+      triggerToast("GUEST REVOKED");
     }
 
     function initUI(isOwner) {
@@ -433,7 +494,7 @@ textarea::-webkit-scrollbar { display: none; }
 
       msgInput.addEventListener('input', () => {
         msgInput.style.height = 'auto';
-        msgInput.style.height = Math.min(msgInput.scrollHeight, 84) + 'px';
+        msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
         btnSend.disabled = msgInput.value.trim() === '';
       });
 
@@ -443,7 +504,11 @@ textarea::-webkit-scrollbar { display: none; }
         }
       });
 
-      btnSend.addEventListener('click', sendMessage);
+      btnSend.addEventListener('click', () => {
+        btnSend.style.transform = "scale(0.85)";
+        setTimeout(()=> btnSend.style.transform = "", 150);
+        sendMessage();
+      });
 
       async function sendMessage() {
         const text = msgInput.value.trim();
@@ -454,12 +519,34 @@ textarea::-webkit-scrollbar { display: none; }
       }
 
       onValue(ref(db, 'upbox/messages'), (snapshot) => {
-        syncPad.querySelectorAll('.bubble').forEach(b => b.remove());
+        const existingNodes = new Set(Array.from(syncPad.querySelectorAll('.bubble')).map(n => n.id.replace('msg-', '')));
+        const currentNodes = new Set();
+        
         if (snapshot.exists()) {
           emptyState.style.display = 'none';
-          snapshot.forEach(child => renderBubble(child.key, child.val(), syncPad));
-          syncPad.scrollTo({ top: syncPad.scrollHeight, behavior: 'smooth' });
+          snapshot.forEach(child => {
+            currentNodes.add(child.key);
+            if (!existingNodes.has(child.key)) {
+              renderBubble(child.key, child.val(), syncPad);
+            }
+          });
+          
+          existingNodes.forEach(id => {
+            if(!currentNodes.has(id)) {
+              const el = document.getElementById(`msg-${id}`);
+              if(el) {
+                el.style.animation = 'collapseOut 200ms ease forwards';
+                setTimeout(() => el.remove(), 200);
+              }
+            }
+          });
+          
+          // Only scroll down if we are already near the bottom, to prevent forced scrolling during reading.
+          if(syncPad.scrollHeight - syncPad.scrollTop - syncPad.clientHeight < 150) {
+              syncPad.scrollTo({ top: syncPad.scrollHeight, behavior: 'smooth' });
+          }
         } else {
+          syncPad.querySelectorAll('.bubble').forEach(b => b.remove());
           emptyState.style.display = 'flex';
         }
         if(window.lucide) window.lucide.createIcons();
@@ -475,7 +562,7 @@ textarea::-webkit-scrollbar { display: none; }
       if (data.type === 'link') {
         let safeUrl = data.text;
         if (!/^https?:\/\//i.test(safeUrl)) safeUrl = 'https://' + safeUrl;
-        contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link" title="${escapeHtml(data.text)}"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:middle; margin-right:4px;"></i>${escapeHtml(data.text.length > 52 ? data.text.substring(0,52)+'…' : data.text)}</a>`;
+        contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link" title="${escapeHtml(data.text)}"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:text-bottom; margin-right:6px; color: var(--accent-primary);"></i>${escapeHtml(data.text.length > 52 ? data.text.substring(0,52)+'…' : data.text)}</a>`;
       } else {
         contentHtml = `<div class="bubble-text">${escapeHtml(data.text)}</div>`;
       }
@@ -487,9 +574,9 @@ textarea::-webkit-scrollbar { display: none; }
         <div class="bubble-footer">
           <div class="bubble-timestamp">${timeStr}</div>
           <div class="bubble-actions">
-            <button class="action-btn" id="copy-${id}"><i data-lucide="copy" width="14" height="14"></i> Copy</button>
-            ${data.type === 'link' ? `<a href="${escapeHtml(safeUrl)}" target="_blank" class="action-btn"><i data-lucide="external-link" width="14" height="14"></i> Open</a>` : ''}
-            <button class="action-btn danger" id="del-${id}"><i data-lucide="trash-2" width="14" height="14"></i> Del</button>
+            <button class="action-btn" id="copy-${id}"><i data-lucide="copy" width="12" height="12"></i> Copy</button>
+            ${data.type === 'link' ? `<a href="${escapeHtml(safeUrl)}" target="_blank" class="action-btn" style="text-decoration:none;"><i data-lucide="external-link" width="12" height="12"></i> Open</a>` : ''}
+            <button class="action-btn danger" id="del-${id}"><i data-lucide="trash-2" width="12" height="12"></i> Del</button>
           </div>
         </div>
       `;
@@ -497,8 +584,9 @@ textarea::-webkit-scrollbar { display: none; }
 
       document.getElementById(`copy-${id}`).addEventListener('click', function() {
         navigator.clipboard.writeText(data.text).then(() => {
+          triggerToast("ASSET COPIED TO CLIPBOARD");
           const originalHtml = this.innerHTML;
-          this.innerHTML = `<i data-lucide="check" width="14" height="14"></i> Copied`;
+          this.innerHTML = `<i data-lucide="check" width="12" height="12"></i> Copied`;
           this.classList.add('success');
           if(window.lucide) window.lucide.createIcons();
           setTimeout(() => { this.innerHTML = originalHtml; this.classList.remove('success'); if(window.lucide) window.lucide.createIcons(); }, 1500);
@@ -506,8 +594,8 @@ textarea::-webkit-scrollbar { display: none; }
       });
 
       document.getElementById(`del-${id}`).addEventListener('click', () => {
-        div.style.animation = 'collapseOut 200ms ease forwards';
-        setTimeout(() => remove(ref(db, `upbox/messages/${id}`)), 200);
+        remove(ref(db, `upbox/messages/${id}`));
+        triggerToast("ASSET DELETED");
       });
     }
 
