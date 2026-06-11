@@ -1,4 +1,5 @@
 import { ref, get, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getAppInstances } from "./core-auth.js";
 import { initUI } from "./ui-controller.js";
 
@@ -14,7 +15,7 @@ export function setupGuestLogin() {
 }
 
 async function validateGuestCode() {
-  const { db } = getAppInstances();
+  const { db, auth } = getAppInstances();
   const guestInput = document.getElementById('guest-input');
   const guestError = document.getElementById('guest-error');
   const code = guestInput.value.trim();
@@ -38,9 +39,29 @@ async function validateGuestCode() {
     return;
   }
 
-  sessionStorage.setItem('vs_guest_valid', 'true');
-  document.getElementById('screen-guest').style.display = 'none';
-  startGuestSession();
+  // VALID CODE -> Sign in anonymously and request approval
+  try {
+    const userCredential = await signInAnonymously(auth);
+    const uid = userCredential.user.uid;
+    
+    await set(ref(db, `upbox/guestRequests/${uid}`), {
+      hash: hashHex,
+      timestamp: Date.now()
+    });
+    
+    guestInput.value = 'Awaiting Approval...';
+    guestInput.disabled = true;
+    
+    onValue(ref(db, `upbox/approvedGuests/${uid}`), (snap) => {
+      if (snap.val() === true) {
+        sessionStorage.setItem('vs_guest_valid', 'true');
+        document.getElementById('screen-guest').style.display = 'none';
+        startGuestSession();
+      }
+    });
+  } catch (err) {
+    showError(guestError, guestInput, 'Auth Error. Please enable Anonymous Sign-in in Firebase Console.');
+  }
 }
 
 function showError(errEl, inputEl, msg) {
@@ -53,7 +74,7 @@ function showError(errEl, inputEl, msg) {
 }
 
 export function startGuestSession() {
-  const { db } = getAppInstances();
+  const { db, auth } = getAppInstances();
   initUI(false); 
   
   document.addEventListener('visibilitychange', () => {
@@ -69,7 +90,9 @@ export function startGuestSession() {
 }
 
 function endGuestSession() {
+  const { auth } = getAppInstances();
   sessionStorage.removeItem('vs_guest_valid');
+  if (auth.currentUser) auth.signOut();
   window.location.replace('https://www.google.com');
 }
 
@@ -94,4 +117,5 @@ export async function generateGuestCode() {
 export async function revokeGuestSession() {
   const { db } = getAppInstances();
   await remove(ref(db, 'upbox/guestSession'));
+  await remove(ref(db, 'upbox/approvedGuests'));
 }

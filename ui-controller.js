@@ -1,4 +1,4 @@
-import { ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { ref, onValue, push, remove, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAppInstances } from "./core-auth.js";
 
 const PINNED_LINKS = [
@@ -50,9 +50,31 @@ export function initUI(isOwner) {
       } else {
         document.getElementById('guest-badge').style.display = 'none';
         document.getElementById('btn-generate-guest').style.display = 'flex';
-        if(snapshot.exists()) remove(ref(db, 'upbox/guestSession'));
+        if(snapshot.exists()) {
+           remove(ref(db, 'upbox/guestSession'));
+           remove(ref(db, 'upbox/approvedGuests'));
+        }
       }
     });
+
+    // act as Server: Listen and approve guest requests cryptographically
+    onValue(ref(db, 'upbox/guestRequests'), async (snapshot) => {
+      if (!snapshot.exists()) return;
+      
+      const sessionSnap = await get(ref(db, 'upbox/guestSession'));
+      if (!sessionSnap.exists() || !sessionSnap.val().active) return;
+      const expectedHash = sessionSnap.val().hash;
+      
+      snapshot.forEach((child) => {
+        const uid = child.key;
+        const data = child.val();
+        if (data.hash === expectedHash) {
+          set(ref(db, `upbox/approvedGuests/${uid}`), true);
+          remove(ref(db, `upbox/guestRequests/${uid}`));
+        }
+      });
+    });
+
   } else {
     document.getElementById('btn-generate-guest').style.display = 'none';
     document.getElementById('guest-badge').style.display = 'flex';
@@ -125,9 +147,14 @@ function renderBubble(id, data, syncPad, db) {
   div.className = 'bubble';
   div.id = `msg-${id}`;
   
-  let contentHtml = data.type === 'link' ? 
-    `<a href="${data.text}" target="_blank" class="bubble-link" title="${data.text}"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:middle; margin-right:4px;"></i>${data.text.length > 52 ? data.text.substring(0,52)+'…' : data.text}</a>` : 
-    `<div class="bubble-text">${escapeHtml(data.text)}</div>`;
+  let contentHtml = '';
+  if (data.type === 'link') {
+    let safeUrl = data.text;
+    if (!/^https?:\/\//i.test(safeUrl)) safeUrl = 'https://' + safeUrl;
+    contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link" title="${escapeHtml(data.text)}"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:middle; margin-right:4px;"></i>${escapeHtml(data.text.length > 52 ? data.text.substring(0,52)+'…' : data.text)}</a>`;
+  } else {
+    contentHtml = `<div class="bubble-text">${escapeHtml(data.text)}</div>`;
+  }
 
   const timeStr = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -137,7 +164,7 @@ function renderBubble(id, data, syncPad, db) {
       <div class="bubble-timestamp">${timeStr}</div>
       <div class="bubble-actions">
         <button class="action-btn" id="copy-${id}"><i data-lucide="copy" width="14" height="14"></i> Copy</button>
-        ${data.type === 'link' ? `<a href="${data.text}" target="_blank" class="action-btn"><i data-lucide="external-link" width="14" height="14"></i> Open</a>` : ''}
+        ${data.type === 'link' ? `<a href="${escapeHtml(safeUrl)}" target="_blank" class="action-btn"><i data-lucide="external-link" width="14" height="14"></i> Open</a>` : ''}
         <button class="action-btn danger" id="del-${id}"><i data-lucide="trash-2" width="14" height="14"></i> Del</button>
       </div>
     </div>

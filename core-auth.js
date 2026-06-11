@@ -1,10 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { initUI } from "./ui-controller.js";
 
 const CONFIG = {
-  ALLOWED_EMAIL: 'your@gmail.com', // YOU MUST CHANGE THIS
+  ALLOWED_EMAIL: 'your@gmail.com', // YOU MUST CHANGE THIS IN THE JS AND FIREBASE RULES
   FIREBASE: {
     apiKey: "AIzaSyCXucunQzPCIMgsp0Y2TS9jaUy7Hs7spps",
     authDomain: "upbox-6ae1c.firebaseapp.com",
@@ -46,6 +46,8 @@ function bootstrapAuth() {
     if (user) {
       if (user.email === CONFIG.ALLOWED_EMAIL) {
         initUI(true); // isOwner = true
+      } else if (user.isAnonymous) {
+        // Handled by guest-engine.js during approval wait
       } else {
         await signOut(auth);
         authError.textContent = "This account is not authorized.";
