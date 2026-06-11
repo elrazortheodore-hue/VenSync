@@ -1,15 +1,7 @@
-const CACHE_NAME = 'vensync-v2';
+const CACHE_NAME = 'vensync-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/auth-screens.html',
-  '/main-app.html',
-  '/theme.css',
-  '/components.css',
-  '/layout.css',
-  '/core-auth.js',
-  '/guest-engine.js',
-  '/ui-controller.js',
   '/manifest.json',
   'https://unpkg.com/lucide@latest'
 ];
