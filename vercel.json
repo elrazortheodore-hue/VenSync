@@ -10,5 +10,10 @@
         { "key": "Content-Security-Policy", "value": "default-src 'self' https://*.googleapis.com https://unpkg.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://www.google.com;" }
       ]
     }
+  ],
+  "rewrites": [
+    { "source": "/public", "destination": "/public.html" },
+    { "source": "/private", "destination": "/private.html" },
+    { "source": "/", "destination": "/public.html" }
   ]
 }

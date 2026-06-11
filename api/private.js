@@ -1,4 +1,11 @@
 export default async function handler(req, res) {
+  const MASTER_PASSWORD = process.env.MASTER_PASSWORD;
+  const clientPass = req.headers['x-ven-pass'];
+
+  if (clientPass !== MASTER_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid master password.' });
+  }
+
   const BIN_KEY = process.env.JSONBIN_KEY;
   const BIN_ID = process.env.JSONBIN_ID;
   const url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
