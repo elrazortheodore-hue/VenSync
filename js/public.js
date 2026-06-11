@@ -160,8 +160,9 @@ function renderMessages() {
         div.id = msg.id;
         
         let contentHtml = '';
+        let safeUrl = '';
         if (msg.type === 'link') {
-          let safeUrl = msg.text;
+          safeUrl = msg.text;
           if (!/^https?:\/\//i.test(safeUrl)) safeUrl = 'https://' + safeUrl;
           contentHtml = `<a href="${escapeHtml(safeUrl)}" target="_blank" class="bubble-link"><i data-lucide="link" width="12" height="12" style="display:inline; vertical-align:text-bottom; margin-right:6px; color: var(--accent-primary);"></i>${escapeHtml(msg.text.length > 52 ? msg.text.substring(0,52)+'…' : msg.text)}</a>`;
         } else {
