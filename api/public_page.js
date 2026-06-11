@@ -1,12 +1,34 @@
-<!DOCTYPE html>
+export default async function handler(req, res) {
+  const BIN_ID = process.env.JSONBIN_ID;
+  const BIN_KEY = process.env.JSONBIN_KEY;
+
+  try {
+    const configCheck = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': BIN_KEY }
+    });
+    
+    if (configCheck.ok) {
+      const configData = await configCheck.json();
+      if (configData.record.isPublicEnabled === false) {
+        // Intercept and redirect to Sudo Mode trap
+        return res.redirect(307, '/private');
+      }
+    }
+  } catch (err) {
+    // Failsafe lockdown
+    return res.redirect(307, '/private');
+  }
+
+  // If public broadcast is enabled, render the HTML natively from memory
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>VenSync | Public Mode</title>
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#030303">
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="mobile-web-app-capable" content="yes">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +36,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="aurora-bg"></div>
@@ -38,8 +60,6 @@
           <span id="connection-text">Live Sync</span>
         </div>
       </div>
-
-      <!-- Public View: No Channel Toggle, No Master Switch -->
 
       <div class="pinned-header glass-panel" id="pinned-toggle">
         <span>Pinned Assets</span>
@@ -67,6 +87,10 @@
     </div>
   </div>
 
-  <script src="./js/public.js"></script>
+  <script src="/js/public.js"></script>
 </body>
-</html>
+</html>`;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  return res.status(200).send(html);
+}

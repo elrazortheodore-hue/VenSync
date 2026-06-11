@@ -12,8 +12,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/public", "destination": "/public.html" },
+    { "source": "/public", "destination": "/api/public_page" },
     { "source": "/private", "destination": "/private.html" },
-    { "source": "/", "destination": "/public.html" }
+    { "source": "/", "destination": "/api/public_page" }
   ]
 }
