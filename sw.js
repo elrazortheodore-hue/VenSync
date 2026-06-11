@@ -1,7 +1,15 @@
-const CACHE_NAME = 'vensync-v1';
+const CACHE_NAME = 'vensync-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
+  '/auth-screens.html',
+  '/main-app.html',
+  '/theme.css',
+  '/components.css',
+  '/layout.css',
+  '/core-auth.js',
+  '/guest-engine.js',
+  '/ui-controller.js',
   '/manifest.json',
   'https://unpkg.com/lucide@latest'
 ];
@@ -28,7 +36,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // Ignore firebase realtime DB websockets and auth requests
   if (event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com')) return;
 
   event.respondWith(
