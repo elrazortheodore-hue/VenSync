@@ -52,27 +52,8 @@ export function initUI(isOwner) {
         document.getElementById('btn-generate-guest').style.display = 'flex';
         if(snapshot.exists()) {
            remove(ref(db, 'upbox/guestSession'));
-           remove(ref(db, 'upbox/approvedGuests'));
         }
       }
-    });
-
-    // act as Server: Listen and approve guest requests cryptographically
-    onValue(ref(db, 'upbox/guestRequests'), async (snapshot) => {
-      if (!snapshot.exists()) return;
-      
-      const sessionSnap = await get(ref(db, 'upbox/guestSession'));
-      if (!sessionSnap.exists() || !sessionSnap.val().active) return;
-      const expectedHash = sessionSnap.val().hash;
-      
-      snapshot.forEach((child) => {
-        const uid = child.key;
-        const data = child.val();
-        if (data.hash === expectedHash) {
-          set(ref(db, `upbox/approvedGuests/${uid}`), true);
-          remove(ref(db, `upbox/guestRequests/${uid}`));
-        }
-      });
     });
 
   } else {

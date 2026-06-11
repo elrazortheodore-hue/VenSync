@@ -2,23 +2,12 @@
   "rules": {
     "upbox": {
       "messages": {
-        ".read": "(auth != null && auth.token.email === 'your@gmail.com') || (auth != null && root.child('upbox/approvedGuests/'+auth.uid).val() === true)",
-        ".write": "(auth != null && auth.token.email === 'your@gmail.com') || (auth != null && root.child('upbox/approvedGuests/'+auth.uid).val() === true)"
+        ".read": "(auth != null && auth.token.email === 'elrazortheodore@gmail.com') || root.child('upbox/guestSession/active').val() === true",
+        ".write": "(auth != null && auth.token.email === 'elrazortheodore@gmail.com') || root.child('upbox/guestSession/active').val() === true"
       },
       "guestSession": {
         ".read": true,
-        ".write": "auth != null && auth.token.email === 'your@gmail.com'"
-      },
-      "guestRequests": {
-        ".read": "auth != null && auth.token.email === 'your@gmail.com'",
-        ".write": "auth != null",
-        "$uid": {
-          ".write": "auth != null && auth.uid === $uid"
-        }
-      },
-      "approvedGuests": {
-        ".read": "auth != null",
-        ".write": "auth != null && auth.token.email === 'your@gmail.com'"
+        ".write": "auth != null && auth.token.email === 'elrazortheodore@gmail.com'"
       }
     }
   }

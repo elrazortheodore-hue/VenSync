@@ -1,5 +1,4 @@
 import { ref, get, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getAppInstances } from "./core-auth.js";
 import { initUI } from "./ui-controller.js";
 
@@ -15,52 +14,36 @@ export function setupGuestLogin() {
 }
 
 async function validateGuestCode() {
-  const { db, auth } = getAppInstances();
+  const { db } = getAppInstances();
   const guestInput = document.getElementById('guest-input');
   const guestError = document.getElementById('guest-error');
   const code = guestInput.value.trim();
   if (!code) return;
 
-  const snapshot = await get(ref(db, 'upbox/guestSession'));
-  const session = snapshot.val();
-  
-  if (!session || !session.active || Date.now() > session.expiresAt) {
-    showError(guestError, guestInput, 'Code expired or invalid.');
-    return;
-  }
-
-  const encoder = new TextEncoder();
-  const data = encoder.encode(code + session.salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
-  
-  if (hashHex !== session.hash) {
-    showError(guestError, guestInput, 'Invalid code.');
-    return;
-  }
-
-  // VALID CODE -> Sign in anonymously and request approval
   try {
-    const userCredential = await signInAnonymously(auth);
-    const uid = userCredential.user.uid;
+    const snapshot = await get(ref(db, 'upbox/guestSession'));
+    const session = snapshot.val();
     
-    await set(ref(db, `upbox/guestRequests/${uid}`), {
-      hash: hashHex,
-      timestamp: Date.now()
-    });
+    if (!session || !session.active || Date.now() > session.expiresAt) {
+      showError(guestError, guestInput, 'Code expired or invalid.');
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(code + session.salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
     
-    guestInput.value = 'Awaiting Approval...';
-    guestInput.disabled = true;
-    
-    onValue(ref(db, `upbox/approvedGuests/${uid}`), (snap) => {
-      if (snap.val() === true) {
-        sessionStorage.setItem('vs_guest_valid', 'true');
-        document.getElementById('screen-guest').style.display = 'none';
-        startGuestSession();
-      }
-    });
-  } catch (err) {
-    showError(guestError, guestInput, 'Auth Error. Please enable Anonymous Sign-in in Firebase Console.');
+    if (hashHex !== session.hash) {
+      showError(guestError, guestInput, 'Invalid code.');
+      return;
+    }
+
+    sessionStorage.setItem('vs_guest_valid', 'true');
+    document.getElementById('screen-guest').style.display = 'none';
+    startGuestSession();
+  } catch (e) {
+    showError(guestError, guestInput, 'Network or Database error.');
   }
 }
 
@@ -117,5 +100,4 @@ export async function generateGuestCode() {
 export async function revokeGuestSession() {
   const { db } = getAppInstances();
   await remove(ref(db, 'upbox/guestSession'));
-  await remove(ref(db, 'upbox/approvedGuests'));
 }
