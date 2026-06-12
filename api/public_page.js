@@ -680,6 +680,37 @@ textarea{font-family:var(--f)}
   :root{--sw:220px}
   .messages{padding:16px 14px 8px}
 }
+
+/* Offline pending message styling (WhatsApp style pending state) */
+.msg-group.offline-pending {
+  opacity: 0.7;
+}
+.msg-group.offline-pending .bubble {
+  background: #f1f3f4 !important;
+  border-color: #dadce0 !important;
+  color: #5f6368 !important;
+  font-style: italic;
+}
+.msg-group.offline-pending .link-card {
+  background: #f1f3f4 !important;
+  border-color: #dadce0 !important;
+}
+.msg-group.offline-pending .doc-card {
+  background: #f1f3f4 !important;
+  border-color: #dadce0 !important;
+}
+@media (prefers-color-scheme: dark) {
+  .msg-group.offline-pending .bubble {
+    background: #202124 !important;
+    border-color: #303134 !important;
+    color: #9aa0a6 !important;
+  }
+  .msg-group.offline-pending .link-card,
+  .msg-group.offline-pending .doc-card {
+    background: #1c1c24 !important;
+    border-color: #303134 !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -900,20 +931,7 @@ function updateOnlineStatus(isOnline) {
   }
 }
 
-// 5-Minute Keep-Alive Pinger to verify connection and prevent serverless cold starts
-setInterval(keepServerAlive, 300000); // 5 minutes
-async function keepServerAlive() {
-  try {
-    const res = await fetch('/api/public?ping=true');
-    if (res.ok) {
-      updateOnlineStatus(true);
-    } else {
-      updateOnlineStatus(false);
-    }
-  } catch (e) {
-    updateOnlineStatus(false);
-  }
-}
+// Continuous server pinger removed to save battery. Relying on window online event to sync queue.
 
 async function syncOfflineQueue() {
   if (!navigator.onLine) return;
@@ -1075,11 +1093,11 @@ function renderMessagesList() {
 
   merged.forEach(msg => {
     const msgGroup = document.createElement('div');
-    msgGroup.className = 'msg-group';
+    const isOfflineItem = msg.id && msg.id.startsWith('off-');
+    msgGroup.className = 'msg-group' + (isOfflineItem ? ' offline-pending' : '');
     msgGroup.id = \`bubble-\${msg.id}\`;
 
     let contentHtml = '';
-    const isOfflineItem = msg.id && msg.id.startsWith('off-');
     
     if (msg.type === 'link') {
       let domain = '';
