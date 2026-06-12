@@ -1,50 +1,54 @@
-# VenSync | Industrial-Grade Serverless PWA Synchronization Pad
+# VenSync
 
-VenSync is a highly secure, real-time synchronization pad architected for zero-latency data broadcasting and cooperative task tracking across public and private channels. Built on a **Hard-Decoupled Serverless Architecture** running on Vercel's Edge Network, VenSync leverages Progressive Web App (PWA) standards to deliver a fully functional offline-first user experience. 
-
----
-
-## Architectural Principles
-
-### 1. Zero-Trust Serverless Isolation
-To prevent client-side JavaScript bypasses and DOM inspection vulnerabilities, VenSync physically decouples administrative capabilities:
-- **Public Mode (`/public` or `/`)**: Served dynamically by `/api/public_page`. It returns a fully self-contained HTML document (exceeding 1,500 lines of code) containing all essential styles and scripts inline. Public users can browse public-tagged cards, filter by category channels, search, and submit new public cards. Administrative elements, editing functions, and private messages are completely absent from the served markup, ensuring that private data is never exposed over the wire.
-- **Private Mode (`/private`)**: Served from `/private.html`. It acts as the secure "Sudo Mode" dashboard. Access requires authentication against the master passphrase. Once unlocked, the owner has full read/write controls, including classification categorization, task status updates, editing, purging, public visibility toggles, and database import/export backups.
-
-### 2. Hard-Decoupled Serverless APIs
-The Node.js serverless functions in the `/api` directory serve as the secure gatekeeper:
-- `/api/private.js`: Mandates the `X-Ven-Pass` validation matching the secret `MASTER_PASSWORD` environment variable. It processes paginated card reads, category-channel filtering, individual card updates (PATCH), deletions (DELETE), and full database backup restores (PUT).
-- `/api/public.js`: First validates if the public access switch is enabled. If allowed, it serves *only* messages tagged with `pubTag = 'public'` (GET) and processes append-only message submissions (POST), forcing public tags.
-
-### 3. PWA Offline-First & Stagnant Queueing
-VenSync operates seamlessly in disconnected environments by utilizing standard web service worker caching and local storage queues:
-- **Service Worker (`sw.js`)**: Implements a network-first strategy for HTML pages (ensuring master access switches are evaluated live) and cache-first strategies for static assets (favicon, manifest, stylesheets). Bypasses caching for all dynamic API endpoints (`/api/*`).
-- **Offline UI States**: When the browser is offline (`navigator.onLine === false`), the user is not blocked from typing or sending messages. Messages are queued immediately in the local store (`vs_offline_queue` for private, `vs_public_offline_queue` for public).
-- **Stagnant Grey Styling**: Queued messages are rendered immediately into the chat timeline using a customized WhatsApp-like pending style. These bubbles are styled in a muted, stagnant "cemented" grey (`.offline-pending`) with italicized text and an "Offline Queue" badge to visually denote that the transmission is pending sync.
-- **Automatic Online Sync**: The client listens to the native browser `online` event. As soon as connectivity is restored, the queue is processed in chronological order. Each message is uploaded to Vercel, removed from the local queue, and seamlessly transitioned to "Synced" state with a success toast notification.
+VenSync is a secure, real-time synchronization console and collaborative dashboard built on a decoupled serverless architecture. Engineered for low-latency communication and task tracking, it delivers a seamless, offline-first Progressive Web App (PWA) experience across public gateway portals and authenticated private control terminals.
 
 ---
 
-## Technology Stack
+## Architecture Overview
 
-- **Cloud Platform**: Vercel Serverless & Edge Network
-- **Frontend Core**: HTML5, CSS3, ES6 JavaScript (Inlined for maximum self-containment and offline reliability)
-- **Database Engine**: JSONBin.io (Unified datastore for configuration state and encrypted message array)
-- **Design System**: Mobile-First design, glassmorphism UI elements, dark/light theme tokens, and CSS safe-area handling for mobile viewport fits.
+VenSync physically segregates user roles and views to prevent administrative bypasses and keep private configurations secure.
+
+```mermaid
+graph TD
+    User[Web Browser Client] -->|Public Access /| PublicView[Public Gateway Portal]
+    User -->|Admin Access /private| PrivateView[Private Terminal Console]
+    
+    PublicView -->|GET/POST Append-Only| PublicAPI[Serverless API: /api/public]
+    PrivateView -->|GET/POST/PATCH/DELETE| PrivateAPI[Serverless API: /api/private]
+    
+    PublicAPI -->|Filtered Reads/Writes| DB[(JSONBin Unified Storage)]
+    PrivateAPI -->|Full CRUD & Backups| DB
+```
+
+### 1. Isolated View Gateways
+* **Public Gateway (`/`)**: Rendered dynamically via serverless function. It serves a fully self-contained HTML page containing all stylesheet design tokens and script modules. Public readers can search, filter channels, read public-tagged cards, and submit new public cards. Administrative panels, edit capabilities, and delete functions are entirely absent from the served markup.
+* **Private Console (`/private`)**: Accessed securely through the private terminal layout. Once authenticated, users can manage all classifications, modify task status parameters, toggle card visibility tags, edit notes, restore database backups, and delete cards.
+
+### 2. Guarded Serverless APIs
+* `/api/public.js`: First validates server-side category and access switches. Only reads cards tagged with a public visibility parameter and restricts uploads to safe, append-only structures.
+* `/api/private.js`: Requires an authenticated master passcode header to process paginated lists, card editing patches, secure database backups, and record deletions.
+
+### 3. Progressive Offline Sync
+* **Service Worker Caching**: Utilizes offline network-first service worker intercepts to cache essential templates and system resources.
+* **Muted Pending Queues**: Offline inputs are queued locally and rendered in the feed using a WhatsApp-like pending style (greyed italics with a pending queue label).
+* **Connection Re-establishment**: The client automatically registers native connection listeners and pushes queued cards to the backend database chronologically upon internet recovery.
 
 ---
 
-## Repository Cleanliness
-To maintain pristine code hygiene and prevent duplicate asset sync errors, all client-side JavaScript controllers have been compiled and inline-engineered into the main HTML nodes (`private.html` and `api/public_page.js`). The redundant `/js` directory has been removed.
+## Core Capabilities
+
+* **Accents Themes**: Dynamic accent transformations between blue (chat mode) and green (task states filter) with no purple or pink gradients.
+* **Interactive Dialogs**: All system interactions—including channel creations, file attachments, and deletion confirmations—occur within in-app modal overlays.
+* **Autolock Inactivity Grace Period**: Employs a 120-second (2-minute) visibility grace period, preventing instant session lockouts on brief tab changes.
+* **Cloud Attachment Warnings**: Prompt-free file selection and drag-drop inputs warn users before storing sensitive credentials on cloud bins.
+* **Card Mention Tagging**: Text matches of `[Card: Title](id)` are rendered as interactive pill badges that display card details upon click.
 
 ---
 
-## Deployment Prerequisites
+## Environment Variables
 
-To deploy your own VenSync terminal, register the project on Vercel and define the following Vercel Environment Variables:
+Register your terminal on Vercel and define the following variables:
 
-1. `MASTER_PASSWORD`: Your alphanumeric passphrase required to authenticate Sudo mode.
-2. `JSONBIN_ID`: The target database Bin ID on JSONBin.io.
-3. `JSONBIN_KEY`: Your secret API master key on JSONBin.io (`X-Master-Key`).
-
-Once configured, pushes to the GitHub repository automatically trigger Vercel CDN builds.
+1. `MASTER_PASSWORD` — Alphanumeric passphrase to unlock the Private Sudo Console.
+2. `JSONBIN_ID` — Target database bucket ID on JSONBin.io.
+3. `JSONBIN_KEY` — API master key on JSONBin.io (`X-Master-Key`).
