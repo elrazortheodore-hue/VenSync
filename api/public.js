@@ -21,13 +21,19 @@ export default async function handler(req, res) {
     // 2. GET: Load public messages paginated, filter by category
     if (req.method === 'GET') {
       const allMessages = record.messages || [];
-
-      // Server-side filter to only allow public tagged items
-      const publicMessages = allMessages.filter(m => m.pubTag === 'public');
+      const publicCategories = record.publicCategories || ['General'];
 
       const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
       const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
       const category = req.query.category || null;
+
+      // Strict query verification block: if they ask for a private category, block them
+      if (category && category !== 'all' && !publicCategories.includes(category)) {
+        return res.status(403).json({ error: 'Access Denied: Private Channel' });
+      }
+
+      // Server-side filter to only allow public tagged items in public categories
+      const publicMessages = allMessages.filter(m => m.pubTag === 'public' && publicCategories.includes(m.category || 'General'));
 
       // Filter by category if requested
       let filtered = publicMessages;
@@ -43,7 +49,7 @@ export default async function handler(req, res) {
         return res.status(200).json({
           messages: sliced,
           hasMore: offset + limit < filtered.length,
-          categories: [...new Set(publicMessages.map(m => m.category).filter(Boolean))].sort()
+          categories: publicCategories
         });
       } else {
         return res.status(200).json({ messages: filtered });

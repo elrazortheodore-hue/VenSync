@@ -41,6 +41,8 @@ export default async function handler(req, res) {
           messages: sliced,
           hasMore: offset + limit < filtered.length,
           isPublicEnabled: record.isPublicEnabled !== undefined ? record.isPublicEnabled : true,
+          publicCategories: record.publicCategories || ['General'],
+          privateCategories: record.privateCategories || ['TO-DO'],
           categories: [...new Set(allMessages.map(m => m.category).filter(Boolean))].sort()
         });
       } else {
@@ -76,7 +78,7 @@ export default async function handler(req, res) {
     
     // 3. PATCH: Update a specific card's values or public switch setting
     else if (req.method === 'PATCH') {
-      const { id, isPublicEnabled, ...fieldsToUpdate } = req.body;
+      const { id, isPublicEnabled, publicCategories, privateCategories, ...fieldsToUpdate } = req.body;
 
       // Fetch latest database
       const rGet = await fetch(`${url}/latest`, { headers: { 'X-Master-Key': BIN_KEY } });
@@ -100,6 +102,16 @@ export default async function handler(req, res) {
       if (isPublicEnabled !== undefined) {
         record.isPublicEnabled = isPublicEnabled;
         updatedFields.isPublicEnabled = isPublicEnabled;
+      }
+
+      if (publicCategories !== undefined) {
+        record.publicCategories = publicCategories;
+        updatedFields.publicCategories = publicCategories;
+      }
+
+      if (privateCategories !== undefined) {
+        record.privateCategories = privateCategories;
+        updatedFields.privateCategories = privateCategories;
       }
 
       // Save database

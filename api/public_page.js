@@ -48,9 +48,20 @@ export default async function handler(req, res) {
   --blue-soft:   #e8f0fe;
   --green:       #34a853;
   --red:         #ea4335;
-  --oppo:        #4e5df4;
-  --oppo-glow:   rgba(78,93,244,0.10);
-  --oppo-grad:   linear-gradient(135deg,#4e5df4 0%,#7c3aed 55%,#ec4899 100%);
+  
+  /* Theme dynamic variables */
+  --oppo-blue:   #1a73e8;
+  --oppo-blue-glow: rgba(26,115,232,0.10);
+  --oppo-blue-grad: linear-gradient(135deg, #1a73e8 0%, #00c2ff 100%);
+  
+  --oppo-green:  #0f9d58;
+  --oppo-green-glow: rgba(15,157,88,0.10);
+  --oppo-green-grad: linear-gradient(135deg, #0f9d58 0%, #34a853 100%);
+
+  --oppo:        var(--oppo-blue);
+  --oppo-glow:   var(--oppo-blue-glow);
+  --oppo-grad:   var(--oppo-blue-grad);
+
   --doc-bg:      #fafbff;
   --doc-border:  #c5cae9;
   --sh:          0 1px 4px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
@@ -76,14 +87,69 @@ export default async function handler(req, res) {
     --blue-soft:   rgba(138,180,248,0.09);
     --green:       #81c995;
     --red:         #f28b82;
-    --oppo:        #7c87ff;
-    --oppo-glow:   rgba(124,135,255,0.13);
-    --oppo-grad:   linear-gradient(135deg,#7c87ff 0%,#a78bfa 55%,#f472b6 100%);
+    --oppo-blue:   #8ab4f8;
+    --oppo-blue-glow: rgba(138,180,248,0.15);
+    --oppo-blue-grad: linear-gradient(135deg, #8ab4f8 0%, #1a73e8 100%);
+    
+    --oppo-green:  #81c995;
+    --oppo-green-glow: rgba(129,201,149,0.15);
+    --oppo-green-grad: linear-gradient(135deg, #81c995 0%, #34a853 100%);
+
+    --oppo:        var(--oppo-blue);
+    --oppo-glow:   var(--oppo-blue-glow);
+    --oppo-grad:   var(--oppo-blue-grad);
     --doc-bg:      #121219;
     --doc-border:  #33334d;
     --sh:          0 1px 4px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.4);
     --sh-md:       0 4px 20px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.4);
   }
+}
+
+/* Shifting animated gradient */
+@keyframes shiftGrad {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animated-gradient {
+  background: linear-gradient(-45deg, #1a73e8, #00c2ff, #1557b0, #00d2c4);
+  background-size: 400% 400%;
+  animation: shiftGrad 12s ease infinite;
+}
+
+/* Transforming menu hamburger to X */
+.hamb-icon {
+  width: 18px;
+  height: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.hamb-icon span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-2);
+  border-radius: 1px;
+  transition: transform 0.38s cubic-bezier(0.68, -0.6, 0.32, 1.6), opacity 0.38s var(--ease);
+}
+.sidebar-open-state .menu-btn .hamb-icon .bar1 {
+  transform: translateY(5px) rotate(45deg) rotate(180deg);
+}
+.sidebar-open-state .menu-btn .hamb-icon .bar2 {
+  transform: translateY(-5px) rotate(-45deg) rotate(180deg);
+}
+
+/* Floating element micro-animation physics */
+@keyframes floatAnim {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+.floating-element {
+  animation: floatAnim 6s ease-in-out infinite;
 }
 
 /* ════════════════════════════════════════
@@ -739,10 +805,13 @@ textarea{font-family:var(--f)}
 
   <div class="sb-foot">
     <div class="av">PUB</div>
-    <div>
+    <div style="flex:1; min-width:0;">
       <div class="u-name">Public Mode</div>
       <div class="u-status"><span class="u-dot"></span>Synced</div>
     </div>
+    <button class="icon-btn" id="sbReloadBtn" title="Sync database now" onclick="triggerManualReload()" style="width:28px; height:28px;">
+      <svg viewBox="0 0 16 16" style="width:14px; height:14px; fill:currentColor;"><path fill-rule="evenodd" d="M8 3a5 5 0 104.546 2.914.5.5 0 01.908-.417A6 6 0 118 2v1z" clip-rule="evenodd"/><path d="M8 4.4a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v3a.5.5 0 01-1 0V5.07l-2.5 2.5a.5.5 0 01-.708-.708l2.5-2.5H8.5a.5.5 0 01-.5-.5z"/></svg>
+    </button>
   </div>
 </aside>
 
@@ -751,8 +820,11 @@ textarea{font-family:var(--f)}
 
   <!-- Topbar -->
   <div class="topbar">
-    <button class="menu-btn" onclick="toggleSidebar()">
-      <svg viewBox="0 0 16 16"><path d="M1 3h14v1.5H1zm0 4.5h14V9H1zM1 12h14v1.5H1z"/></svg>
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+      <div class="hamb-icon">
+        <span class="bar1"></span>
+        <span class="bar2"></span>
+      </div>
     </button>
     <span class="topbar-title" id="topbarTitle">Public Sync Pad</span>
     
@@ -763,6 +835,9 @@ textarea{font-family:var(--f)}
 
     <div class="topbar-actions">
       <div class="sync-badge"><span class="sync-dot"></span>Live</div>
+      <button class="icon-btn" id="pwaInstallBtn" title="Install Web App" style="display:none;" onclick="triggerPwaInstall()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5zM7.5 11.5a.5.5 0 01-1 0V2.707L4.354 4.854a.5.5 0 11-.708-.708l3-3a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5z"/></svg>
+      </button>
       <button class="icon-btn" title="Share channel" onclick="copyShareLink()">
         <svg viewBox="0 0 16 16"><path d="M11 10.2a2.5 2.5 0 00-1.7.67L5.96 8.6a2.5 2.5 0 000-1.2l3.34-2.27A2.5 2.5 0 1011 3.5a2.49 2.49 0 00-1.7.67L5.96 6.44A2.5 2.5 0 103.5 10.5a2.49 2.49 0 001.7-.67l3.34 2.27A2.5 2.5 0 1011 10.2z"/></svg>
       </button>
@@ -785,9 +860,13 @@ textarea{font-family:var(--f)}
   <!-- Input zone -->
   <div class="input-zone">
     <div class="toolbar">
-      <button class="tb-btn" onclick="triggerFileInput()" title="Attach document text file">
+      <button class="tb-btn" onclick="openAttachModal()" title="Attach cloud document card with warning">
         <svg viewBox="0 0 16 16"><path d="M4.5 3a2.5 2.5 0 015 0v9a1.5 1.5 0 01-3 0V5a.5.5 0 011 0v7a.5.5 0 001 0V3a1.5 1.5 0 00-3 0v9a2.5 2.5 0 005 0V5a.5.5 0 011 0v7a3.5 3.5 0 01-7 0V3z"/></svg>
         <span>Attach</span>
+      </button>
+      <button class="tb-btn" onclick="openTagCardModal()" title="Reference an existing card">
+        <svg viewBox="0 0 16 16" style="width:11px; height:11px; fill:currentColor;"><path d="M2 2a2 2 0 012-2h8a2 2 0 012 2v13.5a.5.5 0 01-.777.416L8 13.101l-5.223 3.315A.5.5 0 012 16V2zm2-1a1 1 0 00-1 1v12.566l4.636-2.943a.5.5 0 01.528 0L13 14.566V2a1 1 0 00-1-1H4z"/></svg>
+        <span>Tag Card</span>
       </button>
       <button class="tb-btn" id="linkToggle" onclick="toggleLinkMode()" title="Enforce URL link validation">
         <svg viewBox="0 0 16 16"><path d="M6.354 5.5H4a3 3 0 000 6h3a3 3 0 002.83-2H9a2 2 0 01-2 1.5H4a2 2 0 010-4h2.354l1-1zM9.646 10.5H12a3 3 0 000-6H9a3 3 0 00-2.83 2H7a2 2 0 012-1.5h3a2 2 0 010 4H9.646l-1 1z"/></svg>
@@ -865,6 +944,60 @@ textarea{font-family:var(--f)}
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Cloud Document Attachment Modal -->
+<div class="modal-overlay" id="attachModal" style="display:none; z-index:1100;">
+  <div class="modal-card" style="max-width: 440px; border-radius: var(--r);">
+    <div class="modal-head" style="padding: 14px 16px; border-bottom: 1px solid var(--border);">
+      <h3 class="modal-title">Cloud Document Attachment</h3>
+      <button class="menu-btn" onclick="closeAttachModal()"><svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M12.7 3.3a1 1 0 00-1.4 0L8 6.6 4.7 3.3a1 1 0 00-1.4 1.4L6.6 8l-3.3 3.3a1 1 0 001.4 1.4L8 9.4l3.3 3.3a1 1 0 001.4-1.4L9.4 8l3.3-3.3a1 1 0 000-1.4z"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding: 16px; gap: 12px;">
+      <div class="form-group">
+        <label class="form-label">Document Title</label>
+        <input type="text" id="attachTitle" class="form-input" placeholder="e.g. System Parameters">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Document Content</label>
+        <textarea id="attachContent" class="form-textarea" rows="6" placeholder="Enter text content here..."></textarea>
+      </div>
+      <div style="font-size: 11px; color: #b25e00; background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.3); padding: 10px; border-radius: var(--r-sm); display: flex; gap: 8px;">
+        <span style="font-size: 14px;">⚠️</span>
+        <div><strong>Cloud Attachment Warning:</strong> Attaching a file copies its raw content into the VenSync database. Check credentials before sharing.</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+        <span class="form-label">Or upload file content</span>
+        <button class="doc-btn" onclick="triggerFileInput()" style="font-size:11px; padding:4px 8px;">Browse Local File</button>
+      </div>
+    </div>
+    <div class="modal-foot" style="padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: flex-end; gap: 8px;">
+      <button class="doc-btn" onclick="closeAttachModal()">Abort</button>
+      <button class="doc-btn accent" onclick="executeCloudAttach()">Upload & Attach</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card Tagging Modal -->
+<div class="modal-overlay" id="tagCardModal" style="display:none; z-index:1100;">
+  <div class="modal-card" style="max-width: 440px; border-radius: var(--r);">
+    <div class="modal-head" style="padding: 14px 16px; border-bottom: 1px solid var(--border);">
+      <h3 class="modal-title">Tag Collateral Card</h3>
+      <button class="menu-btn" onclick="closeTagCardModal()"><svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M12.7 3.3a1 1 0 00-1.4 0L8 6.6 4.7 3.3a1 1 0 00-1.4 1.4L6.6 8l-3.3 3.3a1 1 0 001.4 1.4L8 9.4l3.3 3.3a1 1 0 001.4-1.4L9.4 8l3.3-3.3a1 1 0 000-1.4z"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding: 16px; gap: 12px;">
+      <div class="form-group">
+        <label class="form-label">Search Cards</label>
+        <input type="text" id="tagCardSearch" class="form-input" placeholder="Type title to filter..." oninput="onTagCardSearchInput(this.value)">
+      </div>
+      <div id="tagCardList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 6px;">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+    <div class="modal-foot" style="padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: flex-end; gap: 8px;">
+      <button class="doc-btn" onclick="closeTagCardModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════
    CLIENT DASHBOARD STATE & SCRIPTS
@@ -877,8 +1010,39 @@ let hasMoreMessages = false;
 let searchQuery = '';
 let linkModeEnforced = false;
 
+// PWA installation triggers
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('pwaInstallBtn');
+  if (installBtn) installBtn.style.display = 'inline-flex';
+});
+
+async function triggerPwaInstall() {
+  if (!deferredPrompt) {
+    showToast("Application is already installed or standalone.");
+    return;
+  }
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast("Installation started!");
+  }
+  deferredPrompt = null;
+  const installBtn = document.getElementById('pwaInstallBtn');
+  if (installBtn) installBtn.style.display = 'none';
+}
+
 // Initialize on load
 window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  const chan = params.get('channel') || params.get('category');
+  if (chan) {
+    activeCategory = chan;
+    document.getElementById('topbarTitle').textContent = chan;
+  }
+
   initApp();
   
   // Dynamic refresh loop (every 5 seconds) to fetch live updates
@@ -1001,6 +1165,14 @@ async function loadMessages(reset = false) {
   try {
     let url = \`/api/public?limit=\${limit}&offset=\${offset}&category=\${activeCategory}\`;
     const response = await fetch(url);
+    if (response.status === 403) {
+      showToast("Access Denied: Private Channel");
+      activeCategory = 'General';
+      document.getElementById('topbarTitle').textContent = 'General';
+      history.replaceState(null, null, window.location.pathname);
+      loadMessages(true);
+      return;
+    }
     if (!response.ok) throw new Error("Failed to load messages");
 
     const data = await response.json();
@@ -1027,6 +1199,13 @@ async function pollNewMessages() {
   try {
     let url = \`/api/public?limit=\${limit}&offset=0&category=\${activeCategory}\`;
     const response = await fetch(url);
+    if (response.status === 403) {
+      activeCategory = 'General';
+      document.getElementById('topbarTitle').textContent = 'General';
+      history.replaceState(null, null, window.location.pathname);
+      loadMessages(true);
+      return;
+    }
     if (!response.ok) return;
 
     const data = await response.json();
@@ -1065,6 +1244,15 @@ function selectCategory(catName, el) {
   document.getElementById('topbarTitle').textContent = catName === 'all' ? 'Public Sync Pad' : catName;
   closeSidebar();
   loadMessages(true);
+}
+
+/* ─ Card Tag Parser ─ */
+function parseCardTags(text) {
+  if (!text) return '';
+  const regex = /\[Card:\s*([^\]]+)\]\((msg-[^)]+|off-[^)]+)\)/g;
+  return text.replace(regex, (match, title, id) => {
+    return \`<span class="card-tag" onclick="openDetailsModal('\${id}'); event.stopPropagation();" style="display:inline-flex; align-items:center; gap:3px; padding:2px 6px; border-radius:4px; background:var(--blue-soft); color:var(--blue); font-size:11px; font-weight:600; cursor:pointer; border:1px solid rgba(26,115,232,0.2); margin:0 2px;">🏷️ \${escapeHtml(title)}</span>\`;
+  });
 }
 
 /* ════════════════════════════════════════
@@ -1107,7 +1295,7 @@ function renderMessagesList() {
           <div class="link-bar"></div>
           <div class="link-body">
             <div class="link-domain"><div class="link-fav"></div>\${escapeHtml(domain)}</div>
-            <div class="link-title">\${escapeHtml(msg.title || msg.text)}</div>
+            <div class="link-title">\${parseCardTags(escapeHtml(msg.title || msg.text))}</div>
             <div class="link-desc">\${escapeHtml(msg.text)}</div>
             <div class="anon-tag"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a2 2 0 110 4 2 2 0 010-4zm0 9.2a6.1 6.1 0 01-4.3-1.8A5 5 0 018 9.5c1.8 0 3.3.9 4.3 2A6.1 6.1 0 018 13.2z"/></svg>PUBLIC PREVIEW</div>
           </div>
@@ -1120,7 +1308,7 @@ function renderMessagesList() {
           <div class="doc-head">
             <div class="doc-icon"><svg viewBox="0 0 16 16"><path d="M9.5 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V5.5L9.5 1zM9 2.5V5h2.5M5 8h6M5 10h6M5 6h3"/></svg></div>
             <div class="doc-title-wrap" onclick="openDetailsModal('\${msg.id}')" style="cursor:pointer;">
-              <div class="doc-title">\${escapeHtml(msg.title || "Document Card")}</div>
+              <div class="doc-title">\${parseCardTags(escapeHtml(msg.title || "Document Card"))}</div>
               <div class="doc-subtitle">\${wordCount} words · Click details</div>
             </div>
             <div class="doc-acts">
@@ -1128,8 +1316,8 @@ function renderMessagesList() {
             </div>
           </div>
           <div class="doc-body collapsed" id="body-\${msg.id}">
-            <div class="doc-snippet">\${escapeHtml(msg.text.substring(0, 150) + (msg.text.length > 150 ? '…' : ''))}</div>
-            <div class="doc-full" id="full-\${msg.id}">\${escapeHtml(msg.text)}</div>
+            <div class="doc-snippet">\${parseCardTags(escapeHtml(msg.text.substring(0, 150) + (msg.text.length > 150 ? '…' : '')))}</div>
+            <div class="doc-full" id="full-\${msg.id}">\${parseCardTags(escapeHtml(msg.text))}</div>
           </div>
           <div class="doc-foot">
             <div class="doc-stats">
@@ -1146,7 +1334,7 @@ function renderMessagesList() {
     else {
       contentHtml = \`
         <div class="bubble" onclick="openDetailsModal('\${msg.id}')" style="cursor:pointer;">
-          \${escapeHtml(msg.text)}
+          \${parseCardTags(escapeHtml(msg.text))}
         </div>\`;
     }
 
@@ -1241,10 +1429,10 @@ function onPaste(e) {
 
   if (text.length >= 600) {
     e.preventDefault();
-    const title = prompt("Large text block. Enter document designation title:", "Pasted Document");
-    if (title !== null) {
-      sendLargeDocument(text, title || "Pasted Document");
-    }
+    openAttachModal();
+    document.getElementById('attachContent').value = text;
+    document.getElementById('attachTitle').value = "Pasted Document";
+    showToast("Large text block queued for attachment");
   }
 }
 
@@ -1280,10 +1468,11 @@ async function sendMsg(e) {
   if (/^https?:\\/\\//i.test(text)) {
     type = 'link';
   } else if (text.length >= 600) {
-    type = 'doc';
-    const userTitle = prompt("Large text block. Enter document title:", "Text Document");
-    if (userTitle === null) return;
-    title = userTitle || "Text Document";
+    openAttachModal();
+    document.getElementById('attachContent').value = text;
+    document.getElementById('attachTitle').value = "Pasted Document";
+    el.value = '';
+    return;
   }
 
   const payload = {
@@ -1399,10 +1588,9 @@ function onFileSelect(event) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    const title = prompt("Attach file text content. Enter designation:", file.name);
-    if (title !== null) {
-      sendLargeDocument(e.target.result, title || file.name);
-    }
+    openAttachModal();
+    document.getElementById('attachContent').value = e.target.result;
+    document.getElementById('attachTitle').value = file.name;
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -1492,6 +1680,7 @@ function copyShareLink() {
 }
 
 function toggleSidebar() {
+  const app = document.querySelector('.app');
   const sb = document.getElementById('sidebar');
   const bd = document.getElementById('sbBackdrop');
   if (sb.classList.contains('open')) {
@@ -1499,12 +1688,105 @@ function toggleSidebar() {
   } else {
     sb.classList.add('open');
     bd.classList.add('show');
+    if (app) app.classList.add('sidebar-open-state');
   }
 }
 
 function closeSidebar() {
+  const app = document.querySelector('.app');
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sbBackdrop').classList.remove('show');
+  if (app) app.classList.remove('sidebar-open-state');
+}
+
+/* ─ Cloud Document Attachment Modal Handlers ─ */
+function openAttachModal() {
+  document.getElementById('attachTitle').value = '';
+  document.getElementById('attachContent').value = '';
+  document.getElementById('attachModal').style.display = 'flex';
+}
+
+function closeAttachModal() {
+  document.getElementById('attachModal').style.display = 'none';
+}
+
+async function executeCloudAttach() {
+  const title = document.getElementById('attachTitle').value.trim();
+  const content = document.getElementById('attachContent').value.trim();
+  if (!title || !content) {
+    showToast("Enter both title and content.");
+    return;
+  }
+  closeAttachModal();
+  await sendLargeDocument(content, title);
+}
+
+/* ─ Card Tagging Modal Handlers ─ */
+function openTagCardModal() {
+  document.getElementById('tagCardSearch').value = '';
+  document.getElementById('tagCardModal').style.display = 'flex';
+  renderTagCardList();
+}
+
+function closeTagCardModal() {
+  document.getElementById('tagCardModal').style.display = 'none';
+}
+
+function onTagCardSearchInput(query) {
+  renderTagCardList(query);
+}
+
+function renderTagCardList(query = '') {
+  const listDiv = document.getElementById('tagCardList');
+  if (!listDiv) return;
+  const q = query.toLowerCase();
+  
+  let filtered = currentMessages;
+  if (q) {
+    filtered = currentMessages.filter(m => 
+      (m.title || m.text || '').toLowerCase().includes(q)
+    );
+  }
+  
+  let html = '';
+  if (filtered.length === 0) {
+    html = \`<div style="text-align:center; padding: 10px; font-size:11px; color:var(--text-3);">No cards found</div>\`;
+  } else {
+    filtered.forEach(m => {
+      const displayTitle = m.title || (m.text ? m.text.substring(0, 30) + '...' : 'Untitled');
+      html += \`<div style="padding: 8px; margin-bottom:4px; border-radius:var(--r-sm); background:var(--surface); cursor:pointer; font-size:12px; border:1px solid var(--border); transition: background 0.1s;" onclick="insertCardTag('\${m.id}', '\${escapeHtml(displayTitle)}')">
+        <strong>\${escapeHtml(displayTitle)}</strong> <span style="font-size:10px; color:var(--text-3); font-family:monospace;">(\${m.id})</span>
+      </div>\`;
+    });
+  }
+  listDiv.innerHTML = html;
+}
+
+function insertCardTag(id, title) {
+  const textInput = document.getElementById('msgInput');
+  const tagStr = \` [Card: \${title}](\${id}) \`;
+  
+  const start = textInput.selectionStart;
+  const end = textInput.selectionEnd;
+  const val = textInput.value;
+  
+  textInput.value = val.substring(0, start) + tagStr + val.substring(end);
+  textInput.focus();
+  textInput.selectionStart = textInput.selectionEnd = start + tagStr.length;
+  
+  closeTagCardModal();
+  onInput(textInput);
+}
+
+/* ─ Manual Sync Spin ─ */
+async function triggerManualReload() {
+  const btn = document.getElementById('sbReloadBtn');
+  btn.classList.add('spinning');
+  showToast("Synchronizing database...");
+  await loadMessages(true);
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+  }, 1000);
 }
 
 function showToast(msg) {
@@ -1549,10 +1831,9 @@ window.addEventListener('drop', (e) => {
 
   const reader = new FileReader();
   reader.onload = function(evt) {
-    const title = prompt("Drop file text content. Enter designation title:", file.name);
-    if (title !== null) {
-      sendLargeDocument(evt.target.result, title || file.name);
-    }
+    openAttachModal();
+    document.getElementById('attachContent').value = evt.target.result;
+    document.getElementById('attachTitle').value = file.name;
   };
   reader.readAsText(file);
 });
