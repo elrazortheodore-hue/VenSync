@@ -1,4 +1,8 @@
 export default async function handler(req, res) {
+  if (req.query.ping === 'true') {
+    return res.status(200).json({ success: true, status: 'online' });
+  }
+
   const BIN_KEY = process.env.JSONBIN_KEY;
   const BIN_ID = process.env.JSONBIN_ID;
   const url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;

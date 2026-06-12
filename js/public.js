@@ -6,6 +6,7 @@ let offset = 0;
 const limit = 20;
 let hasMoreMessages = false;
 let searchQuery = '';
+let linkModeEnforced = false;
 
 // Initialize on load
 window.addEventListener('load', () => {
@@ -13,7 +14,107 @@ window.addEventListener('load', () => {
   
   // Dynamic refresh loop (every 5 seconds) to fetch live updates
   setInterval(pollNewMessages, 5000);
+
+  // Register PWA service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  }
+
+  // Update connection status
+  updateOnlineStatus(navigator.onLine);
 });
+
+window.addEventListener('online', () => updateOnlineStatus(true));
+window.addEventListener('offline', () => updateOnlineStatus(false));
+
+function updateOnlineStatus(isOnline) {
+  const statusContainer = document.querySelector('.sidebar .u-status');
+  const syncBadge = document.querySelector('.sync-badge');
+  const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+  const queueText = queue.length > 0 ? ` (${queue.length} queued)` : '';
+
+  if (statusContainer) {
+    if (isOnline) {
+      statusContainer.innerHTML = `<span class="u-dot" style="background:var(--green); animation:pulse 2s infinite;"></span>Synced`;
+      statusContainer.style.color = 'var(--green)';
+    } else {
+      statusContainer.innerHTML = `<span class="u-dot" style="background:var(--red); animation:none;"></span>Offline${queueText}`;
+      statusContainer.style.color = 'var(--red)';
+    }
+  }
+
+  if (syncBadge) {
+    if (isOnline) {
+      syncBadge.innerHTML = `<span class="sync-dot" style="background:var(--green); animation:pulse 2s infinite;"></span>Live`;
+      syncBadge.style.color = 'var(--green)';
+      syncBadge.style.background = 'rgba(52,168,83,.10)';
+      syncBadge.style.borderColor = 'rgba(52,168,83,.22)';
+    } else {
+      syncBadge.innerHTML = `<span class="sync-dot" style="background:var(--red); animation:none;"></span>Offline${queueText}`;
+      syncBadge.style.color = 'var(--red)';
+      syncBadge.style.background = 'rgba(234,67,53,.10)';
+      syncBadge.style.borderColor = 'rgba(234,67,53,.22)';
+    }
+  }
+
+  if (isOnline) {
+    syncOfflineQueue();
+  }
+}
+
+// 5-Minute Keep-Alive Pinger to verify connection and prevent serverless cold starts
+setInterval(keepServerAlive, 300000); // 5 minutes
+async function keepServerAlive() {
+  try {
+    const res = await fetch('/api/public?ping=true');
+    if (res.ok) {
+      updateOnlineStatus(true);
+    } else {
+      updateOnlineStatus(false);
+    }
+  } catch (e) {
+    updateOnlineStatus(false);
+  }
+}
+
+async function syncOfflineQueue() {
+  if (!navigator.onLine) return;
+  const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+  if (queue.length === 0) return;
+
+  showToast("Syncing offline queue...");
+  const failed = [];
+
+  for (const msg of queue) {
+    const cleanMsg = { ...msg };
+    if (cleanMsg.id && cleanMsg.id.startsWith('off-')) {
+      delete cleanMsg.id; // Server generates new ID
+    }
+    try {
+      const response = await fetch('/api/public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cleanMsg)
+      });
+      if (!response.ok) {
+        failed.push(msg);
+      }
+    } catch (e) {
+      failed.push(msg);
+    }
+  }
+
+  if (failed.length > 0) {
+    localStorage.setItem('vs_public_offline_queue', JSON.stringify(failed));
+    showToast(`Offline sync: ${failed.length} items failed.`);
+    updateOnlineStatus(false);
+  } else {
+    localStorage.removeItem('vs_public_offline_queue');
+    showToast("Offline messages synced!");
+    updateOnlineStatus(true);
+    loadMessages(true);
+  }
+}
 
 /* ════════════════════════════════════════
    APP INITIALIZATION
@@ -24,7 +125,6 @@ function initApp() {
   document.getElementById('searchInput').value = '';
   document.getElementById('searchWrap').style.display = 'none';
   loadMessages(true).then(() => {
-    // Check if there is a specific card ID deep-link hash in the URL (e.g. #msg-123)
     const hash = window.location.hash;
     if (hash && hash.startsWith('#msg-')) {
       const cardId = hash.replace('#', '');
@@ -58,13 +158,16 @@ async function loadMessages(reset = false) {
     hasMoreMessages = data.hasMore;
     renderCategories(data.categories || []);
     renderMessagesList();
+    updateOnlineStatus(true);
   } catch (err) {
+    updateOnlineStatus(false);
     showToast("Sync pad unreachable");
+    renderMessagesList();
   }
 }
 
-// Background polling for new messages without reset-flickering
 async function pollNewMessages() {
+  if (!navigator.onLine) return;
   try {
     let url = `/api/public?limit=${limit}&offset=0&category=${activeCategory}`;
     const response = await fetch(url);
@@ -73,14 +176,10 @@ async function pollNewMessages() {
     const data = await response.json();
     const newMsgs = data.messages || [];
     
-    // Simple check: if the first ID or length changed, do a silent reload
     if (newMsgs.length > 0 && (currentMessages.length === 0 || newMsgs[0].id !== currentMessages[0].id)) {
-      // Retain the offset, but reload the head
       loadMessages(true);
     }
-  } catch (e) {
-    // Silently ignore polling network failures
-  }
+  } catch (e) {}
 }
 
 function loadOlderMessages() {
@@ -119,13 +218,14 @@ function renderMessagesList() {
   const messagesDiv = document.getElementById('messages');
   const loadBtn = document.getElementById('loadOlderBtn');
   
-  const bubbles = messagesDiv.querySelectorAll('.msg-group');
-  bubbles.forEach(b => b.remove());
+  messagesDiv.querySelectorAll('.msg-group').forEach(b => b.remove());
 
-  let filtered = currentMessages;
+  const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+  let merged = [...queue.filter(m => activeCategory === 'all' || m.category === activeCategory), ...currentMessages];
+
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filtered = filtered.filter(m => 
+    merged = merged.filter(m => 
       (m.text || '').toLowerCase().includes(q) || 
       (m.title || '').toLowerCase().includes(q) || 
       (m.category || '').toLowerCase().includes(q) || 
@@ -135,14 +235,14 @@ function renderMessagesList() {
 
   const end = document.getElementById('msgEnd');
 
-  filtered.forEach(msg => {
+  merged.forEach(msg => {
     const msgGroup = document.createElement('div');
-    msgGroup.className = 'msg-group'; // Public messages shown on left (them)
+    msgGroup.className = 'msg-group';
     msgGroup.id = `bubble-${msg.id}`;
 
     let contentHtml = '';
+    const isOfflineItem = msg.id && msg.id.startsWith('off-');
     
-    // 1. LINK CARD
     if (msg.type === 'link') {
       let domain = '';
       try { domain = new URL(msg.text).hostname.replace('www.', ''); } catch (e) { domain = 'link'; }
@@ -157,7 +257,6 @@ function renderMessagesList() {
           </div>
         </div>`;
     } 
-    // 2. DOCUMENT CARD
     else if (msg.type === 'doc') {
       const wordCount = (msg.text || '').trim().split(/\s+/).filter(Boolean).length;
       contentHtml = `
@@ -179,7 +278,7 @@ function renderMessagesList() {
           <div class="doc-foot">
             <div class="doc-stats">
               <span>${wordCount} words</span>
-              <span>● Synced</span>
+              <span>● ${isOfflineItem ? 'Offline Queue' : 'Synced'}</span>
             </div>
             <button class="copy-btn" onclick="copyCardShareLink('${msg.id}')">
               <svg viewBox="0 0 16 16"><path d="M4 4a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 1h8a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z"/><path d="M6 2h4a1 1 0 011 1v1H5V3a1 1 0 011-1z"/></svg>
@@ -188,7 +287,6 @@ function renderMessagesList() {
           </div>
         </div>`;
     } 
-    // 3. STANDARD CHAT BUBBLE
     else {
       contentHtml = `
         <div class="bubble" onclick="openDetailsModal('${msg.id}')" style="cursor:pointer;">
@@ -201,7 +299,9 @@ function renderMessagesList() {
     if (msg.category && msg.category !== 'General') {
       badgeHtml += `<span class="msg-cat-badge">${escapeHtml(msg.category)}</span>`;
     }
-    if (msg.status) {
+    if (isOfflineItem) {
+      badgeHtml += `<span class="msg-status-badge Offline">Offline Queue</span>`;
+    } else if (msg.status) {
       badgeHtml += `<span class="msg-status-badge ${msg.status}">${msg.status}</span>`;
     }
 
@@ -265,6 +365,13 @@ function onInput(el) {
   btn.disabled = el.value.trim().length === 0;
 }
 
+function toggleLinkMode() {
+  linkModeEnforced = !linkModeEnforced;
+  const btn = document.getElementById('linkToggle');
+  btn.classList.toggle('on', linkModeEnforced);
+  showToast(linkModeEnforced ? "Link Verification Active" : "Standard Messaging");
+}
+
 function onPaste(e) {
   const text = e.clipboardData.getData('text/plain');
   
@@ -297,6 +404,11 @@ async function sendMsg(e) {
   const text = el.value.trim();
   if (!text) return;
 
+  if (linkModeEnforced && !/^https?:\/\//i.test(text)) {
+    showToast("Error: Verified URL Required");
+    return;
+  }
+
   if (e && e.currentTarget) {
     const btn = e.currentTarget;
     const ripple = document.createElement('span');
@@ -319,11 +431,30 @@ async function sendMsg(e) {
   }
 
   const payload = {
+    id: 'msg-' + Date.now() + Math.random().toString(36).substr(2, 5),
     text: text,
     type: type,
     title: title,
+    timestamp: Date.now(),
     category: activeCategory === 'all' ? 'General' : activeCategory
   };
+
+  if (!navigator.onLine) {
+    payload.id = 'off-' + payload.id;
+    const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+    queue.push(payload);
+    localStorage.setItem('vs_public_offline_queue', JSON.stringify(queue));
+
+    el.value = '';
+    el.style.height = 'auto';
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('charCount').style.display = 'none';
+
+    renderMessagesList();
+    showToast("Offline: Message queued.");
+    updateOnlineStatus(false);
+    return;
+  }
 
   try {
     const response = await fetch('/api/public', {
@@ -342,17 +473,42 @@ async function sendMsg(e) {
       showToast("Broadcast locked or server busy");
     }
   } catch (err) {
-    showToast("Transmission Error");
+    payload.id = 'off-' + payload.id;
+    const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+    queue.push(payload);
+    localStorage.setItem('vs_public_offline_queue', JSON.stringify(queue));
+
+    el.value = '';
+    el.style.height = 'auto';
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('charCount').style.display = 'none';
+
+    renderMessagesList();
+    showToast("Connection lost. Message queued.");
+    updateOnlineStatus(false);
   }
 }
 
 async function sendLargeDocument(text, title) {
   const payload = {
+    id: 'msg-' + Date.now() + Math.random().toString(36).substr(2, 5),
     text: text,
     type: 'doc',
     title: title,
+    timestamp: Date.now(),
     category: activeCategory === 'all' ? 'General' : activeCategory
   };
+
+  if (!navigator.onLine) {
+    payload.id = 'off-' + payload.id;
+    const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+    queue.push(payload);
+    localStorage.setItem('vs_public_offline_queue', JSON.stringify(queue));
+    renderMessagesList();
+    showToast("Offline: Document queued.");
+    updateOnlineStatus(false);
+    return;
+  }
 
   try {
     const response = await fetch('/api/public', {
@@ -367,7 +523,13 @@ async function sendLargeDocument(text, title) {
       showToast("Sync document failed");
     }
   } catch (err) {
-    showToast("Connection Error");
+    payload.id = 'off-' + payload.id;
+    const queue = JSON.parse(localStorage.getItem('vs_public_offline_queue') || '[]');
+    queue.push(payload);
+    localStorage.setItem('vs_public_offline_queue', JSON.stringify(queue));
+    renderMessagesList();
+    showToast("Offline: Document queued.");
+    updateOnlineStatus(false);
   }
 }
 
@@ -396,7 +558,6 @@ function onFileSelect(event) {
 function openDetailsModal(id) {
   const msg = currentMessages.find(m => m.id === id);
   if (!msg) {
-    // If not found in current messages, attempt to fetch deep link card (we fetch page 1 and try to locate)
     showToast("Opening link...");
     return;
   }
@@ -414,15 +575,12 @@ function openDetailsModal(id) {
     document.getElementById('mLaunchBtn').style.display = 'none';
   }
 
-  // Set window hash to shareable card URL dynamically
   window.location.hash = msg.id;
-
   document.getElementById('detailsModal').style.display = 'flex';
 }
 
 function closeDetailsModal() {
   document.getElementById('detailsModal').style.display = 'none';
-  // Clear card hash without reloading page
   history.replaceState(null, null, ' ');
 }
 
