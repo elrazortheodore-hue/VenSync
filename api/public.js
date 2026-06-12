@@ -1,43 +1,86 @@
 export default async function handler(req, res) {
-  // DOUBLE-LOCK MECHANISM
-  // Check the private Master Switch before serving or accepting any public data
-  const BIN_ID = process.env.JSONBIN_ID;
   const BIN_KEY = process.env.JSONBIN_KEY;
+  const BIN_ID = process.env.JSONBIN_ID;
+  const url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
   try {
-    const configCheck = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': BIN_KEY }
-    });
-    
-    if (configCheck.ok) {
-      const configData = await configCheck.json();
-      if (configData.record.isPublicEnabled === false) {
-        return res.status(403).json({ error: 'Forbidden: Public Mode is locked by the administrator.' });
-      }
+    // 1. Fetch latest database to check configuration
+    const rGet = await fetch(`${url}/latest`, { headers: { 'X-Master-Key': BIN_KEY } });
+    const db = await rGet.json();
+    const record = db.record || { messages: [], isPublicEnabled: true };
+
+    const isPublicEnabled = record.isPublicEnabled !== undefined ? record.isPublicEnabled : true;
+    if (!isPublicEnabled) {
+      return res.status(403).json({ error: 'Forbidden: Public channel is currently locked.' });
     }
-  } catch (err) {
-    // If the config check fails, fail closed for security
-    return res.status(500).json({ error: 'Failed to verify global config' });
-  }
 
-  // If public is enabled, proceed with normal JSonSilo proxying
-  const SILO_KEY = process.env.SILO_KEY;
-  const SILO_ID = process.env.SILO_ID;
-  const url = `https://api.jsonsilo.com/${SILO_ID}`;
-
-  try {
+    // 2. GET: Load public messages paginated, filter by category
     if (req.method === 'GET') {
-      const r = await fetch(url, { headers: { 'X-SILO-KEY': SILO_KEY } });
-      const data = await r.json();
-      return res.status(200).json(data);
-    } else if (req.method === 'PUT') {
-      const r = await fetch(url, {
+      const allMessages = record.messages || [];
+
+      // Server-side filter to only allow public tagged items
+      const publicMessages = allMessages.filter(m => m.pubTag === 'public');
+
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+      const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
+      const category = req.query.category || null;
+
+      // Filter by category if requested
+      let filtered = publicMessages;
+      if (category && category !== 'all') {
+        filtered = publicMessages.filter(m => m.category === category);
+      }
+
+      // Sort newest-first
+      filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+      if (limit !== null) {
+        const sliced = filtered.slice(offset, offset + limit);
+        return res.status(200).json({
+          messages: sliced,
+          hasMore: offset + limit < filtered.length,
+          categories: [...new Set(publicMessages.map(m => m.category).filter(Boolean))].sort()
+        });
+      } else {
+        return res.status(200).json({ messages: filtered });
+      }
+    } 
+    
+    // 3. POST: Append-only posting for public users
+    else if (req.method === 'POST') {
+      const { text, type, title, category } = req.body;
+      if (!text) {
+        return res.status(400).json({ error: 'Message text content is required.' });
+      }
+
+      // Construct a safe public-tagged message card
+      const newMsg = {
+        id: 'msg-' + Date.now() + Math.random().toString(36).substr(2, 5),
+        text: text,
+        type: type || 'text',
+        title: title || '',
+        timestamp: Date.now(),
+        pubTag: 'public', // force public tag status
+        status: 'Pending',
+        category: category || 'General'
+      };
+
+      if (!record.messages) record.messages = [];
+      record.messages.unshift(newMsg);
+
+      // Save database
+      await fetch(url, {
         method: 'PUT',
-        headers: { 'X-SILO-KEY': SILO_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body)
+        headers: { 'X-Master-Key': BIN_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
       });
-      const data = await r.json();
-      return res.status(200).json(data);
+
+      return res.status(200).json({ success: true, message: newMsg });
+    } 
+    
+    else {
+      res.setHeader('Allow', ['GET', 'POST']);
+      return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });

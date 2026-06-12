@@ -1,95 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>VenSync | Infinity</title>
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#030303">
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <meta name="mobile-web-app-capable" content="yes">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <link rel="stylesheet" href="./css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VenSync | Sudo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="aurora-bg"></div>
-  <div id="toast">SECURE</div>
+<div class="app">
 
-  <div id="app-container">
-    <div id="screen-loading">
-      <div class="logo-wordmark">VenSync</div>
-      <p style="color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;">Infinity Terminal</p>
-      <div class="pulse-dot" style="margin-top: 20px;"></div>
+<!-- Sidebar backdrop for mobile -->
+<div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.3 2.6 6.4 6 7 3.4-.6 6-3.7 6-7V4L8 1zm-1 9.4L4.6 8l1.1-1.1L7 9.2l3.3-3.3 1.1 1.1L7 10.4z"/></svg>
     </div>
+    <span class="logo-text">VenSync</span>
+    <button class="sb-close" onclick="closeSidebar()">
+      <svg viewBox="0 0 16 16"><path d="M12.7 3.3a1 1 0 00-1.4 0L8 6.6 4.7 3.3a1 1 0 00-1.4 1.4L6.6 8l-3.3 3.3a1 1 0 001.4 1.4L8 9.4l3.3 3.3a1 1 0 001.4-1.4L9.4 8l3.3-3.3a1 1 0 000-1.4z"/></svg>
+    </button>
+  </div>
 
-    <div id="screen-auth" class="screen-card-wrapper">
-      <div class="glass-card auth-card">
-        <i data-lucide="shield-alert" width="32" height="32" color="var(--accent-primary)" style="animation: glow 2s infinite ease-in-out;"></i>
-        <div class="logo-wordmark" style="font-size: 20px;">VenSync</div>
-        <p style="color: var(--text-secondary); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Encrypted Access</p>
-        <input type="password" id="auth-input" class="pass-input" placeholder="Passphrase" autocomplete="off">
-        <button id="btn-auth-submit" class="btn-primary btn-indigo clickable" style="width: 100%;">Access Secure Node</button>
-        <button id="btn-auth-cancel" class="btn-primary" style="background:transparent; border:1px solid var(--border); color:var(--text-secondary); margin-top:8px;">Cancel</button>
-        <div id="auth-error" class="error-toast"></div>
-      </div>
-    </div>
+  <button class="new-btn" onclick="newCategoryPrompt()">
+    <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7V9H5V7h2V5h2v2h2v2H9v2z"/></svg>
+    New channel
+  </button>
 
-    <div id="screen-main">
-      <div class="status-bar glass-panel">
-        <div class="status-left">
-          <div class="wordmark-small"><i data-lucide="box" width="14" height="14" style="display:inline; vertical-align:text-bottom; margin-right:4px;"></i>VenSync</div>
+  <div class="sb-label">Channels</div>
+  <div class="chat-list" id="chatList">
+    <!-- Categories will be dynamically rendered here as channels -->
+    <div class="chat-item active" onclick="selectCategory('all', this)"><span class="chat-dot"></span>SYS_ALL</div>
+  </div>
+
+  <!-- Admin Master Switch Settings Panel -->
+  <div class="sb-label">Settings</div>
+  <div style="padding: 0 10px 14px;">
+    <div class="switch-container">
+      <span class="switch-label" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2);">Public Access</span>
+      <label style="position: relative; display: inline-block; width: 38px; height: 20px;">
+        <input type="checkbox" id="masterSwitch" class="switch-input" onchange="toggleMasterSwitch(this.checked)">
+        <div class="switch-track">
+          <div class="switch-knob"></div>
         </div>
-        <div class="clock" id="clock">00:00:00</div>
-        <div class="status-right" title="Live Sync">
-          <div id="connection-dot" class="connection-dot"></div>
-          <span id="connection-text">Live Sync</span>
-        </div>
-      </div>
-
-      <div class="channel-toggle glass-panel">
-        <button id="btn-channel-public" class="channel-btn active"><i data-lucide="globe" width="14" height="14"></i> Public</button>
-        <button id="btn-channel-private" class="channel-btn"><i data-lucide="lock" width="14" height="14"></i> Private</button>
-      </div>
-
-      <!-- Master Control Panel (Visible only in Private Mode) -->
-      <div id="control-panel" class="control-panel">
-        <div class="control-label"><i data-lucide="radio" width="14" height="14"></i> Public Channel Broadcast</div>
-        <div id="master-switch" class="toggle-switch">
-          <div class="toggle-knob"></div>
-        </div>
-      </div>
-
-      <div class="pinned-header glass-panel" id="pinned-toggle">
-        <span>Pinned Assets</span>
-        <i data-lucide="chevron-down" id="pinned-icon" width="14" height="14" style="transition: transform 0.3s ease;"></i>
-      </div>
-      <div class="pinned-panel glass-panel" id="pinned-panel">
-        <div class="pinned-grid" id="pinned-grid"></div>
-      </div>
-
-      <div class="sync-pad" id="sync-pad">
-        <div class="empty-state" id="empty-state">
-          <i data-lucide="database" width="32" height="32" style="opacity: 0.3;"></i>
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Awaiting Data</span>
-        </div>
-      </div>
-
-      <div class="input-bar glass-panel">
-        <div class="textarea-wrapper">
-          <textarea id="msg-input" placeholder="Paste asset link or text data..." rows="1"></textarea>
-        </div>
-        <button id="btn-send" class="send-btn" disabled>
-          <i data-lucide="arrow-up" width="20" height="20"></i>
-        </button>
-      </div>
+      </label>
     </div>
   </div>
 
-  <script src="./js/private.js"></script>
+  <div class="sb-foot">
+    <div class="av">EF</div>
+    <div>
+      <div class="u-name">Admin Efe</div>
+      <div class="u-status"><span class="u-dot"></span>Sudo Connected</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Panel -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <svg viewBox="0 0 16 16"><path d="M1 3h14v1.5H1zm0 4.5h14V9H1zM1 12h14v1.5H1z"/></svg>
+    </button>
+    <span class="topbar-title" id="topbarTitle">SYS_ALL</span>
+
+    <!-- Search box -->
+    <div class="search-wrap" id="searchWrap" style="display:none; flex:1; margin:0 10px;">
+      <input type="text" id="searchInput" placeholder="Search cards..." style="width:100%; padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:12px; outline:none;" onkeyup="onSearch(this.value)">
+    </div>
+
+    <div class="topbar-actions">
+      <div class="sync-badge"><span class="sync-dot"></span>Live</div>
+      <button class="icon-btn" title="To-Do Mode toggle" id="todoBtn" onclick="toggleTodoMode()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M2.5 3.5a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm3 4a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm0 4a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zM1.5 7.5a1 1 0 100 2 1 1 0 000-2zm0 4a1 1 0 100 2 1 1 0 000-2z"/></svg>
+      </button>
+      <button class="icon-btn" title="Ingest Payload (Import JSON)" onclick="triggerImport()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5zM7.646 1.146a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5a.5.5 0 01-1 0V2.707L5.354 4.854a.5.5 0 11-.708-.708l3-3z"/></svg>
+      </button>
+      <button class="icon-btn" title="Extract Secure Data (Export JSON)" onclick="triggerExport()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5zM7.5 11.5a.5.5 0 01-1 0V2.707L4.354 4.854a.5.5 0 11-.708-.708l3-3a.5.5 0 01.708 0l3 3a.5.5 0 01-.708.708L8.5 2.707V11.5z"/></svg>
+      </button>
+      <button class="icon-btn" title="Search cards" onclick="toggleSearch()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M11.742 10.344a6.5 6.5 0 10-1.397 1.398l3.85 3.85a1 1 0 001.415-1.415l-3.868-3.833zm-5.242 1.156a5 5 0 110-10 5 5 0 010 10z"/></svg>
+      </button>
+      <button class="icon-btn" title="Terminate Session" onclick="logOut()">
+        <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M11.5 4a.5.5 0 01.5.5v3h3.5a.5.5 0 010 1H12v3a.5.5 0 01-1 0v-7a.5.5 0 01.5-.5zm-4.5.5a.5.5 0 00-1 0v7a.5.5 0 001 0v-7zM2 3a1 1 0 00-1 1v8a1 1 0 001 1h4a.5.5 0 010 1H2a2 2 0 01-2-2V4a2 2 0 012-2h4a.5.5 0 010 1H2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages" id="messages">
+    <!-- Pagination load older button -->
+    <button id="loadOlderBtn" class="doc-btn" style="margin: 0 auto 10px; display: none; align-self: center;" onclick="loadOlderMessages()">Load Older Messages</button>
+    <div id="msgEnd"></div>
+  </div>
+
+  <!-- Input Zone -->
+  <div class="input-zone">
+    <div class="toolbar">
+      <button class="tb-btn" onclick="triggerFileInput()" title="Attach text file as document card">
+        <svg viewBox="0 0 16 16"><path d="M4.5 3a2.5 2.5 0 015 0v9a1.5 1.5 0 01-3 0V5a.5.5 0 011 0v7a.5.5 0 001 0V3a1.5 1.5 0 00-3 0v9a2.5 2.5 0 005 0V5a.5.5 0 011 0v7a3.5 3.5 0 01-7 0V3z"/></svg>
+        <span>Attach</span>
+      </button>
+      <button class="tb-btn" id="linkToggle" onclick="toggleLinkMode()" title="Enforce URL link validation">
+        <svg viewBox="0 0 16 16"><path d="M6.354 5.5H4a3 3 0 000 6h3a3 3 0 002.83-2H9a2 2 0 01-2 1.5H4a2 2 0 010-4h2.354l1-1zM9.646 10.5H12a3 3 0 000-6H9a3 3 0 00-2.83 2H7a2 2 0 012-1.5h3a2 2 0 010 4H9.646l-1 1z"/></svg>
+        <span>Link</span>
+      </button>
+    </div>
+
+    <div class="input-wrap">
+      <textarea
+        class="msg-input" id="msgInput" rows="1"
+        placeholder="Type a message, paste text, or drop a file…"
+        oninput="onInput(this)"
+        onpaste="onPaste(event)"
+        onkeydown="onKey(event)"
+      ></textarea>
+      <span class="char-count" id="charCount" style="display:none"></span>
+      <button class="send-btn" id="sendBtn" disabled onclick="sendMsg(event)">
+        <svg viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 01.11.54l-5.819 14.547a.75.75 0 01-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 01.124-1.33L15.314.037a.5.5 0 01.54.11z"/></svg>
+      </button>
+    </div>
+    <div class="paste-hint">
+      <span class="kbd">Enter</span>
+      <span class="label">Send · Large pastes auto-attach as documents</span>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- Hidden File Input -->
+<input type="file" id="fileInput" accept=".txt,.md,.html,.csv,.json" style="display:none" onchange="onFileSelect(event)">
+<input type="file" id="importFileInput" accept=".json" style="display:none" onchange="onImportFileSelected(event)">
+
+<!-- Drag Overlay -->
+<div class="drag-ov" id="dragOv">
+  <div class="drag-label">
+    <div class="drag-title">Drop to sync</div>
+    <div class="drag-sub">Text files, documents, or raw text</div>
+  </div>
+</div>
+
+<!-- Lock Screen / Auth Modal -->
+<div id="screenAuth" class="modal-overlay" style="z-index: 2000; background: var(--bg); display: flex;">
+  <div class="modal-card" style="max-width: 340px; padding: 30px; text-align: center; border: 1px solid var(--border);">
+    <div style="margin-bottom: 20px; font-size: 48px; animation: pulse 2s infinite;">🔒</div>
+    <h1 style="font-size: 24px; font-weight: 300; letter-spacing: 0.15em; margin-bottom: 5px; color: var(--text);">VenSync</h1>
+    <p style="color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 30px;">Encrypted Sudo Node</p>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <input type="password" id="authPass" class="form-input" placeholder="PASSPHRASE" style="text-align: center; letter-spacing: 0.2em;" onkeypress="if(event.key==='Enter') loginAdmin()">
+      <button class="send-btn" id="loginBtn" onclick="loginAdmin()" style="width: 100%; height: 44px; border-radius: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">Authenticate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card Details & Editor Modal (View/Edit) -->
+<div class="modal-overlay" id="detailsModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 class="modal-title" id="mHeader">Card Details</h3>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <button class="doc-btn" id="mEditToggleBtn" onclick="toggleModalEditMode()" style="font-size:11px; padding:3px 8px;"><svg viewBox="0 0 16 16" style="width:11px; height:11px; fill:currentColor; margin-right:3px; display:inline-block; vertical-align:text-bottom;"><path d="M12.854.146a.5.5 0 00-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 000-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 015 13.5V13h-.5a.5.5 0 01-.5-.5V12h-.5a.5.5 0 01-.5-.5V11h-.5a.5.5 0 01-.5-.5V10h-.5a.499.499 0 01-.175-.032l-.179.178a.5.5 0 00-.11.168l-2 5a.5.5 0 00.65.65l5-2a.5.5 0 00.168-.11l.178-.178z"/></svg>Edit</button>
+        <button class="menu-btn" onclick="closeDetailsModal()" style="border:none; background:none; color:var(--text-2); cursor:pointer;"><svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M12.7 3.3a1 1 0 00-1.4 0L8 6.6 4.7 3.3a1 1 0 00-1.4 1.4L6.6 8l-3.3 3.3a1 1 0 001.4 1.4L8 9.4l3.3 3.3a1 1 0 001.4-1.4L9.4 8l3.3-3.3a1 1 0 000-1.4z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- VIEW MODE PANEL -->
+    <div class="modal-body" id="mViewMode">
+      <div class="form-group">
+        <span class="form-label">Designation</span>
+        <h2 id="mTitle" style="font-size:16px; font-weight:700; color:var(--text); word-break:break-word;"></h2>
+      </div>
+      <div class="form-group" id="mUrlGroup">
+        <span class="form-label">Vector Path (URL)</span>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="mUrl" class="form-input" readonly style="flex:1; opacity:0.8;">
+          <button class="doc-btn" onclick="copyCardLink()" style="flex-shrink:0;">Copy Link</button>
+        </div>
+      </div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div class="form-group">
+          <span class="form-label">Classification / Channel</span>
+          <span id="mCategory" class="msg-cat-badge" style="align-self:flex-start;">General</span>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Architecture Type</span>
+          <span id="mArchType" style="font-size:11px; font-family:monospace; font-weight:700;">LNK</span>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Visibility Tag</span>
+          <span id="mPubTagBadge" class="msg-status-badge" style="color:var(--oppo); border-color:rgba(78,93,244,0.3); background:rgba(78,93,244,0.08);">Private</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">Operational Notes</span>
+        <div id="mNotes" style="font-family:monospace; padding:10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:12px; white-space:pre-wrap; max-height:200px; overflow-y:auto;"></div>
+      </div>
+      <div class="form-group">
+        <span class="form-label">Initialization Stamp</span>
+        <span id="mStamp" style="font-size:10px; font-family:monospace; color:var(--text-3);">-</span>
+      </div>
+    </div>
+
+    <!-- EDIT MODE PANEL -->
+    <div class="modal-body" id="mEditMode" style="display:none;">
+      <input type="hidden" id="eMsgId">
+      <div class="form-group">
+        <label class="form-label">Designation / Title</label>
+        <input type="text" id="eTitle" class="form-input" placeholder="Enter title...">
+      </div>
+      <div class="form-group" id="eUrlGroup">
+        <label class="form-label">Vector Path (URL)</label>
+        <input type="text" id="eUrl" class="form-input" placeholder="https://...">
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label class="form-label">Classification (Channel)</label>
+          <select id="eCategorySelect" class="form-select" onchange="onCategorySelectChange(this.value)">
+            <!-- Populated dynamically -->
+          </select>
+          <input type="text" id="eCategoryOther" class="form-input" placeholder="Enter custom channel..." style="margin-top:6px; display:none;">
+        </div>
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label class="form-label">Architecture Type</label>
+          <select id="eArchTypeSelect" class="form-select" onchange="onArchTypeSelectChange(this.value)">
+            <!-- Populated dynamically -->
+          </select>
+          <input type="text" id="eArchTypeOther" class="form-input" placeholder="Enter custom type..." style="margin-top:6px; display:none;">
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label class="form-label">Execution State</label>
+          <select id="eStatus" class="form-select">
+            <option value="Pending">Standby (Pending)</option>
+            <option value="Started">Active (Started)</option>
+            <option value="Completed">Verified (Completed)</option>
+            <option value="Scratch">Nullified (Scratch)</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label class="form-label">Routing Tag (Visibility)</label>
+          <select id="ePubTag" class="form-select">
+            <option value="">Private (Internal Only)</option>
+            <option value="public">Public Broadcast Channel</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Operational Notes</label>
+        <textarea id="eNotes" class="form-textarea" rows="4" placeholder="Enter parameters..."></textarea>
+      </div>
+    </div>
+
+    <!-- MODAL FOOTER -->
+    <div class="modal-foot">
+      <div id="mViewFoot" style="display:flex; gap:8px; width:100%;">
+        <button class="doc-btn accent" id="mLaunchBtn" onclick="launchCardUrl()" style="margin-right:auto;">Initiate Launch</button>
+        <button class="doc-btn" onclick="closeDetailsModal()">Close</button>
+      </div>
+      <div id="mEditFoot" style="display:none; gap:8px; width:100%;">
+        <button class="doc-btn" onclick="triggerCardDelete()" style="margin-right:auto; color:var(--red); border-color:rgba(234,67,53,0.3); background:rgba(234,67,53,0.08);">Delete Card</button>
+        <button class="doc-btn" onclick="saveCardEdits()">Save Card</button>
+        <button class="doc-btn" onclick="cancelModalEditMode()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Purge Confirmation Modal -->
+<div class="modal-overlay" id="purgeModal" style="display:none; z-index:1100;">
+  <div class="modal-card" style="max-width: 320px; border-top: 3px solid var(--red);">
+    <div class="modal-body text-center" style="align-items:center; text-align:center; padding-top:24px;">
+      <div style="font-size:32px; margin-bottom:12px; color:var(--red);">⚠️</div>
+      <h3 class="modal-title" style="color:var(--text); margin-bottom:8px;">Confirm Purge</h3>
+      <p style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em;">This card will be permanently erased from the network.</p>
+    </div>
+    <div class="modal-foot" style="justify-content:center; gap:12px;">
+      <button class="doc-btn" onclick="closePurgeModal()">Abort</button>
+      <button class="doc-btn accent" onclick="executeCardDelete()" style="background:var(--red); border-color:var(--red); color:white;">Purge</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Password Modal -->
+<div class="modal-overlay" id="exportPassModal" style="display:none; z-index:1100;">
+  <div class="modal-card" style="max-width: 340px;">
+    <div class="modal-head">
+      <h3 class="modal-title">Authorize Export</h3>
+      <button class="menu-btn" onclick="closeExportPassModal()"><svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:currentColor;"><path d="M12.7 3.3a1 1 0 00-1.4 0L8 6.6 4.7 3.3a1 1 0 00-1.4 1.4L6.6 8l-3.3 3.3a1 1 0 001.4 1.4L8 9.4l3.3 3.3a1 1 0 001.4-1.4L9.4 8l3.3-3.3a1 1 0 000-1.4z"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:20px; text-align:center; align-items:center;">
+      <div style="font-size:32px; margin-bottom:12px;">💾</div>
+      <p style="font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:16px;">Verify credentials to download backup payload.</p>
+      <input type="password" id="exportPassInput" class="form-input" placeholder="PASSPHRASE" style="text-align:center; letter-spacing:0.2em;" onkeypress="if(event.key==='Enter') executeBackupExport()">
+    </div>
+    <div class="modal-foot">
+      <button class="doc-btn" onclick="closeExportPassModal()">Abort</button>
+      <button class="doc-btn accent" onclick="executeBackupExport()">Export Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confetti Canvas & Overlay -->
+<div id="confettiOverlay" class="modal-overlay" style="display:none; pointer-events:none; z-index:9999; background:rgba(0,0,0,0.25);">
+  <div style="text-align:center; display:flex; flex-direction:column; align-items:center;">
+    <div style="font-size:72px; margin-bottom:10px;">🚀✨🎉</div>
+    <h1 class="celebrate-text">DIRECTIVE FULFILLED</h1>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="/js/private.js"></script>
 </body>
 </html>
